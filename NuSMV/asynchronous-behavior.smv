@@ -1,0 +1,41 @@
+-- Asynchronous Behavior Example
+--
+-- Consider a control system that must emit the signal stop once an error is
+-- detected. Moreover, we know that the system is doomed to fail.
+--
+-- NTCC Process -> *TELL(error) || ! WHEN error DO !TELL(stop)
+
+MODULE main
+  VAR
+    error : boolean;
+    stop  : boolean;
+
+
+  FAIRNESS
+    stop = TRUE
+
+  ASSIGN
+    init(error) := 
+      case 
+        stop = TRUE  : TRUE;
+        stop = FALSE : FALSE;
+      esac;
+
+    init(stop) := {TRUE, FALSE};
+
+    next(error) :=
+      case
+        error = FALSE & stop = FALSE & next(stop) = FALSE : FALSE;
+        error = FALSE & stop = FALSE & next(stop) = TRUE  : TRUE;
+        error = TRUE  & stop = TRUE  & next(stop) = TRUE  : {FALSE, TRUE};
+        error = FALSE & stop = TRUE  & next(stop) = TRUE  : {FALSE, TRUE};
+        TRUE                                              : error;
+      esac;
+
+    next(stop) :=
+      case
+        error = FALSE & stop = FALSE : {FALSE, TRUE} ;
+        error = TRUE  & stop = TRUE  : TRUE;
+        error = FALSE & stop = TRUE  : TRUE;
+        TRUE                         : stop;
+      esac;

@@ -1,0 +1,69 @@
+-- Rhythm Patterns example
+-- 
+-- NTCC Process -> 
+-- Beat :=  Tell (beat) || Next^3 (Tell (beat)) || Next^5 (Tell (beat)) || Next^7 (Tell (beat)) || Next^9 (Tell (beat)) || Next^11 (Tell (beat)) ||
+--          Next^14 (Tell (beat)) || Next^16 (Tell (beat)) || Next^18 (Tell (beat)) || Next^20 (Tell (beat)) || Next^22 (Tell (beat)) 
+-- Start := Tell (start)
+-- Check := Next^12 (stop)
+-- System := Beat || Start || Check ||
+
+MODULE main
+  VAR
+    state : {s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,s21,s22,s23,s24};
+    start : boolean;
+    stop  : boolean;
+    beat  : boolean;
+
+  ASSIGN
+
+    init (state) := s1 ;
+    init (beat)  := TRUE;
+    init (start) := TRUE;
+    init (stop)  := FALSE;
+
+
+    next(stop) :=
+      case
+        state = s12 : TRUE;
+        TRUE        : FALSE;
+      esac;
+
+    next(start) :=
+      case
+        next(state) = s1 : TRUE;
+        TRUE             : FALSE;
+      esac;
+
+    next(beat) :=
+      case
+        next(state) = s1 | state = s3 | state = s5 | state = s7 | state = s9 | state = s11 | state = s14 | state = s16 | state = s18 | state =s20 | state = s22 : TRUE;
+        TRUE                                                                                                                                                    : FALSE;
+      esac;
+
+    next(state) :=
+      case
+        state = s1  : s2;
+        state = s2  : s3;
+        state = s3  : s4;
+        state = s4  : s5;
+        state = s5  : s6;
+        state = s6  : s7;
+        state = s7  : s8;
+        state = s8  : s9;
+        state = s9  : s10;
+        state = s10 : s11;
+        state = s11 : s12;
+        state = s12 : s13;
+        state = s13 : s14;
+        state = s14 : s15;
+        state = s15 : s16;
+        state = s16 : s17;
+        state = s17 : s18;
+        state = s18 : s19;
+        state = s19 : s20;
+        state = s20 : s21;
+        state = s21 : s22;
+        state = s22 : s23;
+        state = s23 : s24;
+        state = s24 : state;
+      esac;

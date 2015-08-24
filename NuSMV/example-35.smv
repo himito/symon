@@ -1,0 +1,22 @@
+-- Example 3.5
+--
+-- NTCC Process -> !*TELL(c)
+
+
+MODULE main
+ VAR
+  c : boolean;
+
+ FAIRNESS
+  c = TRUE
+
+ ASSIGN
+
+  init(c) := {TRUE, FALSE};
+
+  next(c) :=
+    case
+      c = FALSE : {TRUE, FALSE};
+      c = TRUE  : {TRUE, FALSE};
+    esac;
+

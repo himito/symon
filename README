@@ -1,0 +1,7 @@
+Dependencies:
+  * Ocaml (http://ocaml.org)
+  * Ocamllex
+  * Ocamlyacc
+
+Installing dependencies:
+  * brew install opam

@@ -1,0 +1,55 @@
+-- LIGHT EXAMPLE
+--
+-- Assume a simple control system that must emit the signal on in the next
+-- time-unit when the environment reports a given signal signal in the current
+-- time-unit. Otherwise, it must emit the signal off in the next time-unit. This
+-- can be model as the process
+--
+-- NTCC PROCESS -> !(WHEN signal DO NEXT TELL (on) || UNLESS signal NEXT TELL (off))
+
+MODULE main
+
+  VAR
+    signal : boolean;
+    off    : boolean;
+    on     : boolean;
+
+  ASSIGN
+    init(signal) := {TRUE, FALSE};
+    init(off)    := FALSE;
+    init(on)     := FALSE;
+
+    next(signal) :=
+      case
+        off = FALSE & on = FALSE & signal = FALSE : {FALSE, TRUE};
+        off = FALSE & on = FALSE & signal = TRUE  : {FALSE, TRUE};
+        off = TRUE  & on = FALSE & signal = TRUE  : {FALSE, TRUE};
+        off = FALSE & on = TRUE  & signal = TRUE  : {FALSE, TRUE};
+        off = FALSE & on = TRUE  & signal = FALSE : {FALSE, TRUE};
+        off = TRUE  & on = FALSE & signal = FALSE : {FALSE, TRUE};
+        TRUE                                      : signal;
+      esac;
+
+    next(off) :=
+      case
+        off = FALSE & on = FALSE & signal = FALSE : {TRUE};
+        off = FALSE & on = FALSE & signal = TRUE  : {FALSE};
+        off = TRUE  & on = FALSE & signal = TRUE  : {FALSE};
+        off = FALSE & on = TRUE  & signal = TRUE  : {FALSE};
+        off = FALSE & on = TRUE  & signal = FALSE : {TRUE};
+        off = TRUE  & on = FALSE & signal = FALSE : {TRUE};
+        TRUE                                      : off;
+      esac;
+
+    next(on) :=
+      case
+        off = FALSE & on = FALSE & signal = FALSE : {FALSE};
+        off = FALSE & on = FALSE & signal = TRUE  : {TRUE};
+        off = TRUE  & on = FALSE & signal = TRUE  : {TRUE};
+        off = FALSE & on = TRUE  & signal = TRUE  : {TRUE};
+        off = FALSE & on = TRUE  & signal = FALSE : {FALSE};
+        off = TRUE  & on = FALSE & signal = FALSE : {FALSE};
+        TRUE                                      : on;
+      esac;
+
+

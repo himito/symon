@@ -1,0 +1,18 @@
+/**
+ *  Examples of ntcc processes
+ **/
+
+
+//!(When {signal : Next (Tell (on))} || Unless {signal : Tell (off)})
+
+//!(*(Tell (c)))
+
+// *(Tell (c))
+
+//*(Tell (error)) || !(When {error : !(Tell (stop))})
+
+
+
+// Example of rhythm patterns
+// Tell (start) || Next 12 (Tell (stop)) || Tell (beat) || Next 3 (Tell (beat)) || Next 5 (Tell (beat)) || Next 7 (Tell (beat)) || Next 9 (Tell (beat)) || Next 11 (Tell (beat)) || Next 14 (Tell (beat)) || Next 16 (Tell (beat)) || Next 18 (Tell (beat)) || Next 20 (Tell (beat)) || Next 22 (Tell (beat))
+Tell (a) || When {b : Tell (c)}
