@@ -8,18 +8,19 @@ programming *ntcc* [1]. The underlying theory was published in [2].
 
 ### Dependencies
 
-  * [Ocaml](http://ocaml.org)
-  * Ocamllex
-  * Ocamlyacc
+We recommend to install the following dependencies using the package manager [opam](https://opam.ocaml.org).
 
-To install dependencies, we advise to use `opam`.
+```Bash
+  brew install opam
+```
 
-  * For OSX: `brew install opam`
+ * [Ocaml](http://ocaml.org)
+ * Ocamllex
+ * Ocamlyacc
 
-### Compilation
+### Build
 
 The compilation is as usual:`make`
-
 
 ## References
 
@@ -30,3 +31,7 @@ Comput., 9(1), 145–188.
 [2] Arias, J., Guzmán, M., & Olarte, C. (2015). A Symbolic Model for Timed
 Concurrent Constraint Programming. Electronic Notes in Theoretical Computer
 Science, 312, 161–177. https://doi.org/10.1016/j.entcs.2015.04.010.
+
+## Note
+
+Utils folder contains the necessary files for syntax highlighting of ntcc language.
