@@ -1,7 +1,7 @@
 # SyMoN
 
 Symbolic model checker for the non deterministic temporal concurrent constraint
-programming *ntcc* [[1]]. The underlying theory was published in [[2]].
+programming *ntcc* [1]. The underlying theory was published in [2].
 
 
 ## Installation
