@@ -20,11 +20,12 @@ We recommend to install the following dependencies using the package manager [op
 
  * [Ocaml](http://ocaml.org)
  * Ocamllex
- * Ocamlyacc
+ * [Menhir](http://gallium.inria.fr/~fpottier/menhir/)
+ * [OCamlgraph](http://ocamlgraph.lri.fr)
 
 ### Build
 
-The compilation is as usual:`make`
+The compilation is as usual:`make`.
 
 ## References
 
