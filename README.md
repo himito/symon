@@ -3,8 +3,8 @@
 Symbolic model checker for the non deterministic temporal concurrent constraint
 programming *ntcc* [1]. The underlying theory was published in:
 
-    Arias, J., Guzmán, M., & Olarte, C. (2015). A Symbolic Model for Timed Concurrent 
-    Constraint Programming. Electronic Notes in Theoretical Computer Science, 312, 161–177. 
+    Arias, J., Guzmán, M., & Olarte, C. (2015). A Symbolic Model for Timed Concurrent
+    Constraint Programming. Electronic Notes in Theoretical Computer Science, 312, 161–177.
     https://doi.org/10.1016/j.entcs.2015.04.010.
 
 
@@ -34,4 +34,4 @@ Comput., 9(1), 145–188.
 
 ## Note
 
-Utils folder contains the necessary files for syntax highlighting of ntcc language.
+Folder `utils` contains the necessary files for syntax highlighting of ntcc language.
