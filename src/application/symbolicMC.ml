@@ -1,6 +1,8 @@
 (**
-  This is the main module. It parses the ntcc program into the defined structure and generates its symbolic model.
-  @author Jaime Arias (ariasalmeida@gmail.com)
+  This is the main module. It parses the ntcc program into the defined
+  structure and generates its symbolic model.
+
+  @author Jaime Arias (jaime.arias@inria.fr)
   @version 1.0
  *)
 
@@ -9,23 +11,26 @@ open Lexer
 open Auxiliar
 open Symbolic
 
-(** function that parses the ntcc process *)
+(** function that parses the ntcc process from a string *)
 let process_of_string s =
   Parser.main Lexer.lex (Lexing.from_string s)
 
-(** function that parses the ntcc program **)
+(** function that parses the ntcc program from a file **)
 let process_of_file =
-  let filename = Sys.argv.(1) in
-  Parser.main Lexer.lex (Lexing.from_channel (open_in filename))
+  try
+    let filename = Sys.argv.(1) in
+    Parser.main Lexer.lex (Lexing.from_channel (open_in filename))
+  with e ->
+    print_endline "Error: Missing filename"; exit(1)
 
-let system = match process_of_file  with Some p -> p | Empty -> print_endline "Empty file"; exit(1)
+(** return the parsed ntcc program *)
+let ntcc_program =
+  match process_of_file with
+    Some p -> print_endline ("NTCC Process : \n"^(string_of_process p)^"\n"); p
+  | Empty -> print_endline "Empty file"; exit(1)
 
-
-(* Generate the symbolic model *)
-let ntcc_program = system
+(** Generate the symbolic model *)
 let symbolic_model = buildSymbolicModel ntcc_program
-
-let _ = print_endline ("NTCC Process : \n"^(string_of_process ntcc_program)^"\n")
 let _ = print_endline ("Formula : \n"^(printLogic symbolic_model)^"\n")
 
 let getLatex model  =
