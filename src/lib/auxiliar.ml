@@ -86,13 +86,13 @@ let printLTS lts =
   done
 
 (** function that prints the symbolic formula *)
-let rec printLogic f =
+let rec string_of_formula f =
   match f with
     | Cons c -> string_of_constraint c
     | Abs c -> "¬"^(string_of_constraint c)
-    | And_L (f1,f2) -> (printLogic f1)^" ^ "^(printLogic f2)
-    | Or_L (f1,f2) -> "["^(printLogic f1)^"]"^" v "^"["^(printLogic f2)^"]"
-    | Next_L f1 -> "o"^(printLogic f1)
+    | And_L (f1,f2) -> (string_of_formula f1)^" ^ "^(string_of_formula f2)
+    | Or_L (f1,f2) -> "["^(string_of_formula f1)^"]"^" v "^"["^(string_of_formula f2)^"]"
+    | Next_L f1 -> "o"^(string_of_formula f1)
 
 
 (** function that unfolds Next^(index) process *)

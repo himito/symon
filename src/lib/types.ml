@@ -1,5 +1,6 @@
 (**
- This modules contains the definition of a constraint, a ntcc process, a logic formula and a lts
+   This module contains the types for defining constraints, ntcc processes,
+   logic formulas and label transition systems (LTS).
 *)
 open Graph
 

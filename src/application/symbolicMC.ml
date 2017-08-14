@@ -11,29 +11,30 @@ open Lexer
 open Auxiliar
 open Symbolic
 
-(** function that parses the ntcc process from a string *)
-let process_of_string s =
+(** function that parses a ntcc process from a string *)
+let process_from_string s =
   Parser.main Lexer.lex (Lexing.from_string s)
 
-(** function that parses the ntcc program from a file **)
-let process_of_file =
+(** function that parses a ntcc program from a file **)
+let process_from_file =
   try
     let filename = Sys.argv.(1) in
     Parser.main Lexer.lex (Lexing.from_channel (open_in filename))
-  with e ->
-    print_endline "Error: Missing filename"; exit(1)
+  with
+    Sys_error(msg) -> print_endline msg; exit(1)
+  | Invalid_argument(_) -> print_endline "Error: the command needs a file as input."; exit(1)
 
 (** return the parsed ntcc program *)
 let ntcc_program =
-  match process_of_file with
-    Some p -> print_endline ("NTCC Process : \n"^(string_of_process p)^"\n"); p
+  match process_from_file with
+    Some p -> Printf.printf "NTCC Process: \n  %s\n\n" (string_of_process p); p
   | Empty -> print_endline "Empty file"; exit(1)
 
 (** Generate the symbolic model *)
-let symbolic_model = buildSymbolicModel ntcc_program
-let _ = print_endline ("Formula : \n"^(printLogic symbolic_model)^"\n")
+let symbolic_model = build_symbolic_model ntcc_program
+let _ = Printf.printf "Formula: \n  %s\n" (string_of_formula symbolic_model)
 
-let getLatex model  =
+(* let getLatex model  =
   let getAtomicLatex a =
     let rec getConstraintLatex c =
       match c with
@@ -85,4 +86,4 @@ let file = open_out "output-lts.dot" in
   let _ = Dot.output_graph file g in
   close_out file
 
-let _ = Sys.command "dot -Tpdf output-lts.dot -o output-lts.pdf"
+let _ = Sys.command "dot -Tpdf output-lts.dot -o output-lts.pdf" *)

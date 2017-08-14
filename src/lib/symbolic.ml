@@ -217,7 +217,7 @@ let addDeadEnd formula =
 
 
 
-let buildSymbolicModel ntcc_program =
+let build_symbolic_model ntcc_program =
   let copy_t t =
     { values = t.values;
     next_transitions = t.next_transitions }
@@ -235,24 +235,24 @@ let buildSymbolicModel ntcc_program =
   let rec getGreatestFixPoint s y lts level=
     let new_lts = makeCopy lts in
     let new_y = reduceFormula (if y = Cons True then s else And_L (s, distributeNext y)) in
-    (* let _ = print_string ("mirar aqui ->"^(printLogic new_y)^"\n") in *)
+    (* let _ = print_string ("mirar aqui ->"^(string_of_formula new_y)^"\n") in *)
     List.iter (addFormula2LTS new_lts) (List.map completeFormula (getBetter new_y 0));
     (* print_string "Anterior\n"; *)
-    (* print_endline ("Formula : \n"^(printLogic y)); *)
+    (* print_endline ("Formula : \n"^(string_of_formula y)); *)
     (* printLTS lts; *)
     (* print_string "Nuevo\n"; *)
-    (* print_endline ("Formula : \n"^(printLogic new_y)); *)
+    (* print_endline ("Formula : \n"^(string_of_formula new_y)); *)
     (* printLTS new_lts; *)
     (* print_string "\n"; *)
     if (lts = new_lts) then
       if (level = 0) then
         begin
-          (* print_endline ("FixPoint : \n"^(printLogic y)^"\n"); *)
+          (* print_endline ("FixPoint : \n"^(string_of_formula y)^"\n"); *)
           y
         end
       else
         begin
-          (* print_endline ("FixPoint : \n"^(printLogic new_y)^"\n"); *)
+          (* print_endline ("FixPoint : \n"^(string_of_formula new_y)^"\n"); *)
           new_y
         end
     else
@@ -304,30 +304,28 @@ let buildSymbolicModel ntcc_program =
         let sp = reduceFormula (getSymbolicModel p level) in
         let tmp = List.map completeFormula2 (getBetter sp 0) in
         let sp1 = states2logic tmp in
-        (* let _ = print_string ("\nFormula * : "^(printLogic sp1)^"\n") in *)
+        (* let _ = print_string ("\nFormula * : "^(string_of_formula sp1)^"\n") in *)
         let r = getLeastFixPoint sp1 x0 lts in
-        (* let _ = print_endline ("\nComplete *: "^(printLogic (r)^"\n")) in *)
+        (* let _ = print_endline ("\nComplete *: "^(string_of_formula (r)^"\n")) in *)
         r
 
     | Bang p ->
         let y0 = Cons True in
         let lts = newLTS 300 in
         let sp = reduceFormula (getSymbolicModel p level) in
-        (* let _ = print_string ("\nFormula Antes level("^(string_of_int level)^") ! :"^(printLogic sp)^"\n") in *)
+        (* let _ = print_string ("\nFormula Antes level("^(string_of_int level)^") ! :"^(string_of_formula sp)^"\n") in *)
         let sp1 = match p with
                   | Star _ | Bang _ ->
                       sp
                   | _ ->
                       states2logic (List.map completeFormula2 (getBetter sp 0))
         in
-        (* let _ = print_string ("\nFormula ! :"^(printLogic sp1)^"\n") in *)
+        (* let _ = print_string ("\nFormula ! :"^(string_of_formula sp1)^"\n") in *)
         let r = getGreatestFixPoint sp1 y0 lts level in
         let complete =  states2logicK (List.map completeFormula (getBetter r 0)) in
-        (* let _ = print_endline ("Complete : "^(printLogic (complete))^"\n") in *)
+        (* let _ = print_endline ("Complete : "^(string_of_formula (complete))^"\n") in *)
         complete
     | _ -> Cons (Atomic "Error")
   in
   let model =  (getSymbolicModel (labeling ntcc_program 1) 0) in
   if (deadEnd model) then addDeadEnd model else model
-
-
