@@ -3,9 +3,6 @@
 
 open Graph
 
-(* Exceptions *)
-exception Not_implemented of string
-
 (* Constraint System *)
 type constraint_t = Atomic of string
                   | And_C of constraint_t * constraint_t

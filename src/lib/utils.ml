@@ -3,7 +3,7 @@
 open Types
 
 (* Builds a list of integers from i to n-1 *)
-let rec build_list (i:int) (n:int) =
+let rec build_list (i:int) (n:int) : 'i list =
   if i < n then
     i::(build_list (i+1) n)
   else
@@ -37,7 +37,7 @@ let rec distribute_next (f:formula_t) =
   | _ -> Next f
 
 (* Returns the string representation of a constraint *)
-let rec string_of_constraint (x:constraint_t) =
+let rec string_of_constraint (x:constraint_t) : string =
   match x with
   | Atomic c -> c
   | And_C (c1, c2) -> Printf.sprintf "%s ^ %s" (string_of_constraint c1) (string_of_constraint c2)
@@ -45,17 +45,17 @@ let rec string_of_constraint (x:constraint_t) =
   | True_C -> "true"
 
 (* Returns the string representation of a ntcc process *)
-let rec string_of_process (p:ntcc_process_t) =
+let rec string_of_process (p:ntcc_process_t) : string =
   let string_of_choice (c,p) =
-    Printf.sprintf "when (%s) do (%s)" (string_of_constraint c) (string_of_process p)
+    Printf.sprintf "when (%s) do %s" (string_of_constraint c) (string_of_process p)
   in
   match p with
-  | Tell c -> Printf.sprintf "tell (%s)" (string_of_constraint c)
+  | Tell c -> Printf.sprintf "tell(%s)" (string_of_constraint c)
   | Parallel (p1, p2) -> Printf.sprintf "%s || %s" (string_of_process p1) (string_of_process p2)
-  | Next p -> Printf.sprintf "next (%s)" (string_of_process p)
-  | Star p -> Printf.sprintf "* (%s)" (string_of_process p)
-  | Bang p -> Printf.sprintf "! (%s)" (string_of_process p)
-  | Unless (c, p) -> Printf.sprintf "unless (%s) next (%s)" (string_of_constraint c) (string_of_process p)
+  | Next p -> Printf.sprintf "next(%s)" (string_of_process p)
+  | Star p -> Printf.sprintf "*(%s)" (string_of_process p)
+  | Bang p -> Printf.sprintf "!(%s)" (string_of_process p)
+  | Unless (c, p) -> Printf.sprintf "unless (%s) next(%s)" (string_of_constraint c) (string_of_process p)
   | Choice l -> Printf.sprintf "{ %s }" (String.concat " + " (List.map string_of_choice l))
   | Skip -> "skip"
 
@@ -64,10 +64,10 @@ let rec string_of_formula (f:formula_t) =
   match f with
   | Constraint c -> string_of_constraint c
   | Negation f -> "¬" ^ (string_of_formula f)
-  | And_L (f1, f2) -> Printf.sprintf "%s ^ %s" (string_of_formula f1) (string_of_formula f2)
+  | And_L (f1, f2) -> Printf.sprintf "(%s ^ %s)" (string_of_formula f1) (string_of_formula f2)
   | Or_L (f1,f2) -> Printf.sprintf "[%s] v [%s]" (string_of_formula f1) (string_of_formula f2)
-  | Next f1 -> "o" ^ (string_of_formula f1)
-  | _ -> raise (Not_implemented "function string_of_formula does not support the constructor")
+  | Next f1 -> Printf.sprintf "o(%s)" (string_of_formula f1)
+  | _ -> failwith "function string_of_formula does not support the constructor"
 
 (*
 (* function that converts a state of a lts into a string *)
