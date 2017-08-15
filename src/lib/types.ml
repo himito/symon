@@ -1,36 +1,43 @@
-(**
-   This module contains the types for defining constraints, ntcc processes,
-   logic formulas and label transition systems (LTS).
-*)
+(* This module contains the types for defining constraints, ntcc processes,
+ * logic formulas and label transition systems (LTS). *)
+
 open Graph
 
-(** constraint *)
-type constr = Atomic of string
-              | And of constr * constr
-              | True
-              | False
+(* Exceptions *)
+exception Not_implemented of string
 
-(** ntcc process *)
-type ntcc_proc = Tell of constr
-                | Choice of (constr * ntcc_proc) list
-                | Parallel of ntcc_proc * ntcc_proc
-                | Next of ntcc_proc
-                | Unless of constr * ntcc_proc
-                | Star of ntcc_proc
-                | Bang of ntcc_proc
-                | Skip
+(* Constraint System *)
+type constraint_t = Atomic of string
+                  | And_C of constraint_t * constraint_t
+                  | True_C
+                  | False_C
 
-type ntcc_program = Some of ntcc_proc | Empty
+(* Constraint Temporal Logic (CLTL) *)
+type formula_t = Constraint of constraint_t
+               | And_L of formula_t * formula_t
+               | Or_L of formula_t * formula_t
+               | Negation of formula_t
+               | Next of formula_t
+               | Always of formula_t
+               | Eventually of formula_t
+               | True_L
+               | False_L
 
-(** symbolic representation *)
-type logic = Cons of constr
-            | And_L of logic * logic
-            | Or_L of logic * logic
-            | Next_L of logic
-            | Abs of constr
+(* NTCC Process Syntax *)
+type ntcc_process_t = Tell of constraint_t
+                    | Choice of (constraint_t * ntcc_process_t) list
+                    | Parallel of ntcc_process_t * ntcc_process_t
+                    | Next of ntcc_process_t
+                    | Unless of constraint_t * ntcc_process_t
+                    | Star of ntcc_process_t
+                    | Bang of ntcc_process_t
+                    | Skip
+
+(* NTCC program *)
+type ntcc_program = Some of ntcc_process_t | Empty
 
 (** values of a lts state *)
-type state_value = Cons_S of constr | Abs_S of constr
+(* type state_value = Cons_S of constr | Abs_S of constr
 
 (** pretty representation of the symbolic representation *)
 type pretty_state = (state_value * int) list
@@ -61,4 +68,4 @@ module Dot = Graph.Graphviz.Dot (struct
   let vertex_attributes v = (if v = "" then [`Style `Invis] else [`Shape `Circle; `Style `Filled; `Fillcolor colors.(Random.int (Array.length colors))])
   let vertex_name v = "\""^v^"\""
   let default_vertex_attributes _ = []
-end)
+end) *)

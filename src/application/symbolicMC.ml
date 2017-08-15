@@ -8,7 +8,7 @@
 
 open Types
 open Lexer
-open Auxiliar
+open Utils 
 open Symbolic
 
 (** function that parses a ntcc process from a string *)

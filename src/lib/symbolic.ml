@@ -1,9 +1,8 @@
-(**
- Module that contains the implementation of the symbolic representation of ntcc processes
-*)
+(* Module that contains the implementation of the symbolic representation of
+   ntcc processes *)
 
 open Types
-open Auxiliar
+open Utils
 
 (** function that returns a new hashtbl of a specific size *)
 let newLTS (size:int) =
@@ -86,7 +85,7 @@ let addFormula2LTS lts formula =
     (* make a list of constraints from the formula of the current state *)
     let constrs = List.map (fun (c,id) -> c) (List.filter (fun (x,d) -> d==i ) formula) in
 
-    let state_satifying_id = whichSatisfies lts (buildList 1 (Hashtbl.length lts)) constrs in (* state's id satisfying the constraints *)
+    let state_satifying_id = whichSatisfies lts (build_list 1 (Hashtbl.length lts)) constrs in (* state's id satisfying the constraints *)
 
     let current_state = Hashtbl.find lts !current_state_id in (* get current state *)
 
@@ -234,7 +233,7 @@ let build_symbolic_model ntcc_program =
 (* --------------------------------------------------------------------------------------------------------*)
   let rec getGreatestFixPoint s y lts level=
     let new_lts = makeCopy lts in
-    let new_y = reduceFormula (if y = Cons True then s else And_L (s, distributeNext y)) in
+    let new_y = reduceFormula (if y = Cons True then s else And_L (s, distribute_next y)) in
     (* let _ = print_string ("mirar aqui ->"^(string_of_formula new_y)^"\n") in *)
     List.iter (addFormula2LTS new_lts) (List.map completeFormula (getBetter new_y 0));
     (* print_string "Anterior\n"; *)
@@ -261,7 +260,7 @@ let build_symbolic_model ntcc_program =
 (* --------------------------------------------------------------------------------------------------------*)
   let rec getLeastFixPoint s x lts =
     let new_lts = makeCopy lts in
-    let new_x = reduceFormula (if x = Cons False then s else Or_L (s, distributeNext x)) in
+    let new_x = reduceFormula (if x = Cons False then s else Or_L (s, distribute_next x)) in
     List.iter (addFormula2LTS new_lts) (List.map completeFormula (getBetter new_x 0));
     if (lts = new_lts) then
       (* begin *)

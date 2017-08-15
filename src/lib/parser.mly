@@ -8,7 +8,7 @@
 %{
   open Lexer
   open Types
-  open Auxiliar
+  open Utils
 %}
 
 %start <Types.ntcc_program> main
@@ -21,16 +21,16 @@ main:
 
 constr_expr:
   | CONSTRAINT { Atomic ($1) }
-  | c1 = constr_expr AND c2 = constr_expr { And (c1, c2) }
-  | FALSE { False }
-  | TRUE  { True }
+  | c1 = constr_expr AND c2 = constr_expr { And_C (c1, c2) }
+  | FALSE { False_C }
+  | TRUE  { True_C }
   | OP c = constr_expr CL   { c }
 
 ntcc_expr:
   | TELL OP c = constr_expr CL { Tell (c) }
   | p1 = ntcc_expr PARALLEL p2 = ntcc_expr { Parallel (p1,p2) }
   | NEXT OP p =  ntcc_expr CL { Next (p) }
-  | NEXT i = INT OP p = ntcc_expr CL { unfoldNext p i }
+  | NEXT i = INT OP p = ntcc_expr CL { unfold_next p i }
   | STAR OP p = ntcc_expr CL { Star (p) }
   | BANG OP p = ntcc_expr CL { Bang (p) }
   | UNLESS BOP c = constr_expr COLON p = ntcc_expr BCL { Unless (c,p) }
@@ -42,4 +42,4 @@ when_field:
   WHEN BOP c = constr_expr COLON p = ntcc_expr BCL  { (c,p) }
 
 choice:
-  c = separated_list(PLUS, when_field) { c } 
+  c = separated_list(PLUS, when_field) { c }
