@@ -14,7 +14,7 @@ type formula_t = Constraint of constraint_t
                | And_L of formula_t * formula_t
                | Or_L of formula_t * formula_t
                | Negation of formula_t
-               | Next of formula_t
+               | Next_L of formula_t
                | Always of formula_t
                | Eventually of formula_t
                | True_L

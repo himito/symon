@@ -8,6 +8,9 @@ open Types
 let test_equal a b = fun _ -> assert_equal a b
 let test_failure msg f = (fun _ -> assert_raises (Failure msg) (fun () -> f))
 let constraint_ c = Constraint (Atomic c)
+let conjugation_ a b = And_L (constraint_ a, constraint_ b)
+let disjunction_ a b = Or_L (constraint_ a, constraint_ b)
+let ntcc_process = Tell (Atomic "c")
 
 (* tests for the function build_list *)
 let test_build_list = [
@@ -30,7 +33,7 @@ let test_string_of_formula = [
   "Negation" >:: test_equal "¬c" (string_of_formula (Negation (constraint_ "c")));
   "And" >:: test_equal "(c1 ^ c2)" (string_of_formula (And_L (constraint_ "c1", constraint_ "c2")));
   "Or" >:: test_equal "[c1] v [c2]" (string_of_formula (Or_L (constraint_ "c1", constraint_ "c2")));
-  "Next" >:: test_equal "o(c)" (string_of_formula (Next (constraint_ "c")));
+  "Next" >:: test_equal "o(c)" (string_of_formula (Next_L (constraint_ "c")));
 ]
 
 (* tests for the function string_of_process *)
@@ -45,6 +48,19 @@ let test_string_of_process = [
   "Choice" >:: test_equal "{ when (c) do tell(c1) }" (string_of_process (Choice [(Atomic "c", Tell (Atomic "c1"))]))
 ]
 
+(* tests for the function unfold_next *)
+let test_unfold_next = [
+  "Zero" >:: test_equal ntcc_process (unfold_next ntcc_process 0);
+  "One" >:: test_equal (Next ntcc_process) (unfold_next ntcc_process 1);
+  "Two" >:: test_equal (Next (Next ntcc_process)) (unfold_next ntcc_process 2)
+]
+
+(*  tests for the function distribute_next *)
+let test_distribute_next = [
+  "Otherwise" >:: test_equal (Next_L (constraint_ "c")) (distribute_next (constraint_ "c"));
+  "Conjugation" >:: test_equal (And_L (Next_L (constraint_ "c1"), Next_L (constraint_ "c2"))) (distribute_next (conjugation_ "c1" "c2"));
+  "Disjunction" >:: test_equal (Or_L (Next_L (constraint_ "c1"), Next_L (constraint_ "c2"))) (distribute_next (disjunction_ "c1" "c2"))
+]
 
 (* suite of tests *)
 let suite = [
@@ -52,4 +68,6 @@ let suite = [
   "Function string_of_constraint" >::: test_string_of_constraint;
   "Function string_of_formula" >::: test_string_of_formula;
   "Function string_of_process" >::: test_string_of_process;
+  "Function unfold_next" >::: test_unfold_next;
+  "Function distribute_next" >::: test_distribute_next;
 ]

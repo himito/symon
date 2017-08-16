@@ -9,32 +9,18 @@ let rec build_list (i:int) (n:int) : 'i list =
   else
     []
 
-(* Unfolds Next^(index) constructor *)
-let rec unfold_next (ntcc_proc:ntcc_process_t) (index:int) =
-  match index with
+(** Unfolds [Next^(i)] constructor *)
+let rec unfold_next (ntcc_proc:ntcc_process_t) (i:int) : ntcc_process_t =
+  match i with
   | 0 -> ntcc_proc
-  | _ -> unfold_next (Next ntcc_proc) (index-1)
+  | _ -> unfold_next (Next ntcc_proc) (i-1)
 
-(* Unfolds Parallel processes *)
-let unfold_parallel f l =
-  List.fold_left
-    (fun p i ->
-      match p with
-      | Parallel (Skip, b) -> Parallel (b, (f i))
-      | _ -> Parallel (p, (f i))
-    )
-    Skip l
-
-(* Unfolds Choice processes *)
-let unfold_choice c f l =
-  Choice (List.map (fun i -> (c, f i)) l)
-
-(* Adds a Next operator to a formula *)
-let rec distribute_next (f:formula_t) =
+(** Propagates a [Next] operator inside a formula *)
+let rec distribute_next (f:formula_t) : formula_t =
   match f with
   | Or_L (a,b) -> Or_L ((distribute_next a), (distribute_next b))
   | And_L (a,b) -> And_L ((distribute_next a), (distribute_next b))
-  | _ -> Next f
+  | _ -> Next_L f
 
 (** Returns the string representation of a constraint *)
 let rec string_of_constraint (x:constraint_t) : string =
@@ -66,7 +52,7 @@ let rec string_of_formula (f:formula_t) : string =
   | Negation f -> "¬" ^ (string_of_formula f)
   | And_L (f1, f2) -> Printf.sprintf "(%s ^ %s)" (string_of_formula f1) (string_of_formula f2)
   | Or_L (f1,f2) -> Printf.sprintf "[%s] v [%s]" (string_of_formula f1) (string_of_formula f2)
-  | Next f1 -> Printf.sprintf "o(%s)" (string_of_formula f1)
+  | Next_L f1 -> Printf.sprintf "o(%s)" (string_of_formula f1)
   | _ -> failwith "function string_of_formula does not support the constructor"
 
 (*
