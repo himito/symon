@@ -4,7 +4,7 @@ open OUnit2
 open Utils
 open Types
 
-(* auxiliar function *)
+(* auxiliar functions *)
 let test_equal a b = fun _ -> assert_equal a b
 let test_failure msg f = (fun _ -> assert_raises (Failure msg) (fun () -> f))
 let constraint_ c = Constraint (Atomic c)
@@ -43,7 +43,7 @@ let test_string_of_process = [
   "Next" >:: test_equal "next(tell(c))" (string_of_process (Next (Tell (Atomic "c"))));
   "Start" >:: test_equal "*(tell(c))" (string_of_process (Star (Tell (Atomic "c"))));
   "Bang" >:: test_equal "!(tell(c))" (string_of_process (Bang (Tell (Atomic "c"))));
-  "Unless" >:: test_equal "unless (c) next(tell(c))" (string_of_process (Unless (Atomic "c", Tell (Atomic "c"))));
+  "Unless" >:: test_equal "unless (c) next(tell(c))" (string_of_process (Unless (Atomic "c", Next (Tell (Atomic "c")))));
   "Skip" >:: test_equal "skip" (string_of_process Skip);
   "Choice" >:: test_equal "{ when (c) do tell(c1) }" (string_of_process (Choice [(Atomic "c", Tell (Atomic "c1"))]))
 ]

@@ -31,7 +31,7 @@ let ntcc_program =
   | Empty -> print_endline "Empty file"; exit(1)
 
 (** Generate the symbolic model *)
-(* let symbolic_model = build_symbolic_model ntcc_program
+(* let symbolic_model = symbolic_model ntcc_program
 let _ = Printf.printf "Formula: \n  %s\n" (string_of_formula symbolic_model) *)
 
 (* let getLatex model  =

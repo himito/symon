@@ -1,9 +1,14 @@
-(* Module that contains the implementation of the symbolic representation of
-   ntcc processes *)
+(** Module that contains the implementation of the symbolic representation of
+    NTCC processes *)
 
 open Types
 open Utils
 
+(** Returns the symbolic representation of a NTCC process *)
+let symbolic_model (ntcc_proc:ntcc_process_t) : formula_t =
+  Constraint (Atomic "ok")
+
+(* 
 (** function that returns a new hashtbl of a specific size *)
 let newLTS (size:int) =
   let lts = Hashtbl.create size in (* create new lts *)
@@ -216,7 +221,7 @@ let addDeadEnd formula =
 
 
 
-let build_symbolic_model ntcc_program =
+let symbolic_model ntcc_program =
   let copy_t t =
     { values = t.values;
     next_transitions = t.next_transitions }
@@ -327,4 +332,4 @@ let build_symbolic_model ntcc_program =
     | _ -> Cons (Atomic "Error")
   in
   let model =  (getSymbolicModel (labeling ntcc_program 1) 0) in
-  if (deadEnd model) then addDeadEnd model else model
+  if (deadEnd model) then addDeadEnd model else model *)

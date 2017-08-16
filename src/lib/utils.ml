@@ -41,7 +41,7 @@ let rec string_of_process (p:ntcc_process_t) : string =
   | Next p -> Printf.sprintf "next(%s)" (string_of_process p)
   | Star p -> Printf.sprintf "*(%s)" (string_of_process p)
   | Bang p -> Printf.sprintf "!(%s)" (string_of_process p)
-  | Unless (c, p) -> Printf.sprintf "unless (%s) next(%s)" (string_of_constraint c) (string_of_process p)
+  | Unless (c, p) -> Printf.sprintf "unless (%s) %s" (string_of_constraint c) (string_of_process p)
   | Choice l -> Printf.sprintf "{ %s }" (String.concat " + " (List.map string_of_choice l))
   | Skip -> "skip"
 
