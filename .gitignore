@@ -1,10 +1,11 @@
 **/_build
+**/*.docdir
 *.native
+*.byte
 
 _tags
 myocamlbuild.ml
-setup.data
-setup.ml
+setup.*
 *.mldylib  
 *.mllib 
 
