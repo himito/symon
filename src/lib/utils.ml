@@ -9,7 +9,7 @@ let rec build_list (i:int) (n:int) : 'i list =
   else
     []
 
-(* Unfolds Next^(index) processes *)
+(* Unfolds Next^(index) constructor *)
 let rec unfold_next (ntcc_proc:ntcc_process_t) (index:int) =
   match index with
   | 0 -> ntcc_proc

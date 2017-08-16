@@ -1,14 +1,32 @@
-all:
-	ocaml setup.ml -configure --enable-tests > /dev/null
-	ocaml setup.ml -build
-	ocaml setup.ml -test
+CONFIGUREFLAGS = --enable-tests
+
+SETUP = ocaml setup.ml
+
+default: test
+
+configure:
+	oasis setup
+	$(SETUP) -configure $(CONFIGUREFLAGS) > /dev/null
+
+build: configure
+	$(SETUP) -build
+
+test: build
+	$(SETUP) -test
+
+doc: build
+	$(SETUP) -doc
+
+all: 
+	oasis setup
+	$(SETUP) -all 
 
 clean:
-	rm -rf _build myocamlbuild.ml setup.data setup.ml setup.log _tags
-	rm -rf symbolicMC.byte tests.native
-	rm -f src/lib/symon_lib.* 
+	$(SETUP) -clean
+	rm -rf myocamlbuild.ml setup.data setup.ml _tags
+	rm -rf src/lib/symon_lib.*
 
 deps:
 	opam install menhir oasis ounit 
 
-.PHONY: all clean deps
+.PHONY: all build clean configure deps doc test 
