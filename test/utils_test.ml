@@ -1,4 +1,4 @@
-(* Module containing the tests of the module Utils *)
+(** Module containing the tests of the module Utils *)
 
 open OUnit2
 open Utils

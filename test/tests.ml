@@ -1,4 +1,4 @@
-(* Module collecting all the tests of the project *)
+(** Module collecting all the tests of the project *)
 
 open OUnit2
 

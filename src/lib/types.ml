@@ -1,15 +1,15 @@
-(* This module contains the types for defining constraints, ntcc processes,
- * logic formulas and label transition systems (LTS). *)
+(** This module contains the types for defining constraints, ntcc processes,
+    logic formulas and label transition systems (LTS). *)
 
 open Graph
 
-(* Constraint System *)
+(** Constraint System *)
 type constraint_t = Atomic of string
                   | And_C of constraint_t * constraint_t
                   | True_C
                   | False_C
 
-(* Constraint Temporal Logic (CLTL) *)
+(** Constraint Temporal Logic (CLTL) *)
 type formula_t = Constraint of constraint_t
                | And_L of formula_t * formula_t
                | Or_L of formula_t * formula_t
@@ -20,7 +20,7 @@ type formula_t = Constraint of constraint_t
                | True_L
                | False_L
 
-(* NTCC Process Syntax *)
+(** NTCC Process Syntax *)
 type ntcc_process_t = Tell of constraint_t
                     | Choice of (constraint_t * ntcc_process_t) list
                     | Parallel of ntcc_process_t * ntcc_process_t
@@ -30,10 +30,10 @@ type ntcc_process_t = Tell of constraint_t
                     | Bang of ntcc_process_t
                     | Skip
 
-(* NTCC program *)
+(** Parsed NTCC program *)
 type ntcc_program = Some of ntcc_process_t | Empty
 
-(** values of a lts state *)
+(* values of a lts state *)
 (* type state_value = Cons_S of constr | Abs_S of constr
 
 (** pretty representation of the symbolic representation *)

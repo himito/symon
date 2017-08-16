@@ -1,8 +1,8 @@
-(* This modules contains auxiliary functions *)
+(** This module contains auxiliary functions *)
 
 open Types
 
-(* Builds a list of integers from i to n-1 *)
+(** Builds a list of integers from [i] to [n-1] *)
 let rec build_list (i:int) (n:int) : 'i list =
   if i < n then
     i::(build_list (i+1) n)
@@ -36,7 +36,7 @@ let rec distribute_next (f:formula_t) =
   | And_L (a,b) -> And_L ((distribute_next a), (distribute_next b))
   | _ -> Next f
 
-(* Returns the string representation of a constraint *)
+(** Returns the string representation of a constraint *)
 let rec string_of_constraint (x:constraint_t) : string =
   match x with
   | Atomic c -> c
@@ -44,7 +44,7 @@ let rec string_of_constraint (x:constraint_t) : string =
   | False_C -> "false"
   | True_C -> "true"
 
-(* Returns the string representation of a ntcc process *)
+(** Returns the string representation of a ntcc process *)
 let rec string_of_process (p:ntcc_process_t) : string =
   let string_of_choice (c,p) =
     Printf.sprintf "when (%s) do %s" (string_of_constraint c) (string_of_process p)
@@ -59,7 +59,7 @@ let rec string_of_process (p:ntcc_process_t) : string =
   | Choice l -> Printf.sprintf "{ %s }" (String.concat " + " (List.map string_of_choice l))
   | Skip -> "skip"
 
-(* Returns the string representation of a formula *)
+(** Returns the string representation of a formula *)
 let rec string_of_formula (f:formula_t) : string =
   match f with
   | Constraint c -> string_of_constraint c
