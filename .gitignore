@@ -1,4 +1,11 @@
 **/_build
 *.native
 
+_tags
+myocamlbuild.ml
+setup.data
+setup.ml
+*.mldylib  
+*.mllib 
+
 .vscode

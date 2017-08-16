@@ -6,7 +6,6 @@
 %left AND PARALLEL
 
 %{
-  open Lexer
   open Types
   open Utils
 %}

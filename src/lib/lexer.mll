@@ -1,26 +1,5 @@
 {
-  type token =
-    | CONSTRAINT of string
-    | INT of int
-    | AND
-    | TRUE
-    | FALSE
-    | EOF
-    | OP
-    | CL
-    | TELL
-    | PARALLEL
-    | NEXT
-    | STAR
-    | BANG
-    | UNLESS
-    | BOP
-    | BCL
-    | COLON
-    | WHEN
-    | CHOICE
-    | PLUS
-    | EXP
+    open Parser
 }
 
 rule lex = parse

@@ -60,7 +60,7 @@ let rec string_of_process (p:ntcc_process_t) : string =
   | Skip -> "skip"
 
 (* Returns the string representation of a formula *)
-let rec string_of_formula (f:formula_t) =
+let rec string_of_formula (f:formula_t) : string =
   match f with
   | Constraint c -> string_of_constraint c
   | Negation f -> "¬" ^ (string_of_formula f)

@@ -1,16 +1,14 @@
 all:
-	cd src; make
-
-test: all
-	cd tests; make
+	ocaml setup.ml -configure --enable-tests > /dev/null
+	ocaml setup.ml -build
+	ocaml setup.ml -test
 
 clean:
-	cd src; make clean
-	cd tests; make clean
+	rm -rf _build myocamlbuild.ml setup.data setup.ml setup.log _tags
+	rm -rf symbolicMC.byte tests.native
+	rm -f src/lib/symon_lib.* 
 
-cleanall:
-	cd src; make cleanall
-	rm -rf *.native
-	rm -rf *.pdf
-	rm -rf *.dot
-	rm -rf *.byte
+deps:
+	opam install menhir oasis ounit 
+
+.PHONY: all clean deps

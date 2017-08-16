@@ -1,14 +1,8 @@
 PRJ symon
 
-S src
-S src/lib
-S src/application
+S src/**
+S tests/**
 
-B src/_build
-B src/_build/lib
-B src/_build/application
-
-S tests
-B tests/_build
+B _build/**
 
 PKG ocamlgraph oUnit

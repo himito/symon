@@ -1,0 +1,36 @@
+OASISFormat: 0.4
+Name:        symon
+Version:     1.0
+Synopsis:    Symbolic model checker for the non-deterministic timed
+  concurrent constraint calculus NTCC
+Authors:     Jaime Arias
+License:     GPL-2
+
+AlphaFeatures:
+  ocamlbuild_more_args
+
+XOCamlbuildExtraArgs:
+  -classic-display -use-menhir -tag thread
+
+Executable symon
+  Path: src/application
+  MainIs: symbolicMC.ml
+  BuildTools: ocamlbuild
+  BuildDepends: symon_lib
+
+Library symon_lib 
+  Path: src/lib
+  Modules: Lexer, Parser, Types, Utils
+  BuildTools: ocamlbuild
+  BuildDepends: ocamlgraph, str
+
+Test main 
+  Command: $test
+
+Executable test
+  Path:       test
+  MainIs:     tests.ml
+  BuildTools: ocamlbuild
+  BuildDepends: oUnit, symon_lib
+  CompiledObject: best
+  Install: false

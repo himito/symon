@@ -45,6 +45,7 @@ let test_string_of_process = [
   "Choice" >:: test_equal "{ when (c) do tell(c1) }" (string_of_process (Choice [(Atomic "c", Tell (Atomic "c1"))]))
 ]
 
+
 (* suite of tests *)
 let suite = [
   "Function build_list" >::: test_build_list;
