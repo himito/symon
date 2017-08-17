@@ -34,20 +34,22 @@ type ntcc_process_t = Tell of constraint_t
 (** Parsed NTCC program *)
 type ntcc_program = Some of ntcc_process_t | Empty
 
-(** Values of a LTS state. They must be only atomic constraints *)
-type state_value_t = Present of constraint_t | Absent of constraint_t
-
-(** Tag for the status of a constraint *)
-module Status = struct type t = Present | Absent end 
-
-(** LTS state. It is a set of present and absent constraints *)
-module StateSet = Set.Make(
+(** Set of constraints *)
+module ConstraintSet = Set.Make(
   struct
     let compare = Pervasives.compare
-    type t = state_value_t
+    type t = constraint_t
   end)
 
-type state_t = StateSet.t
+(** A formula of a state is a set of constraints *)
+type state_formula_t = ConstraintSet.t
+
+(** A LTS state is a structure with a positive and a negative part. Each part 
+    consists of a set of constraints *)
+type state_t = {
+  positive : state_formula_t;
+  negative : state_formula_t
+}
 
 (*
 (** pretty representation of the symbolic representation *)
