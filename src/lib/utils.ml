@@ -55,6 +55,22 @@ let rec string_of_formula (f:formula_t) : string =
   | Next_L f1 -> Printf.sprintf "o(%s)" (string_of_formula f1)
   | _ -> failwith "function string_of_formula does not support the constructor"
 
+(** Tag a state value with [Present] or [Absent] *)
+let value_to_status = function Present _ -> Status.Present | Absent _ -> Status.Absent
+
+(** Returns the positive part of a LTS state *)
+let positive_part (state:state_t) : state_t =
+  StateSet.filter (fun v -> (value_to_status v) == Status.Present) state
+
+(** Returns the negative part of a LTS state *)
+let negative_part (state:state_t) : state_t =
+  StateSet.filter (fun v -> (value_to_status v) == Status.Absent) state
+
+(** Returns if two states are equivalent *)
+let equivalent_states (s1:state_t) (s2:state_t) : bool =
+  StateSet.equal (positive_part s1) (positive_part s2) && 
+  StateSet.equal (negative_part s1) (negative_part s2)
+
 (*
 (* function that converts a state of a lts into a string *)
 let string_of_atom s =

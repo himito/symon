@@ -2,6 +2,7 @@
     logic formulas and label transition systems (LTS). *)
 
 open Graph
+open Set
 
 (** Constraint System *)
 type constraint_t = Atomic of string
@@ -33,17 +34,24 @@ type ntcc_process_t = Tell of constraint_t
 (** Parsed NTCC program *)
 type ntcc_program = Some of ntcc_process_t | Empty
 
-(* values of a lts state *)
-(* type state_value = Cons_S of constr | Abs_S of constr
+(** Values of a LTS state. They must be only atomic constraints *)
+type state_value_t = Present of constraint_t | Absent of constraint_t
 
+(** Tag for the status of a constraint *)
+module Status = struct type t = Present | Absent end 
+
+(** LTS state. It is a set of present and absent constraints *)
+module StateSet = Set.Make(
+  struct
+    let compare = Pervasives.compare
+    type t = state_value_t
+  end)
+
+type state_t = StateSet.t
+
+(*
 (** pretty representation of the symbolic representation *)
 type pretty_state = (state_value * int) list
-
-(** lts state *)
-type state = {mutable values: state_value list;
-              mutable next_transitions : int list;
-              }
-
 
 module Node = struct
   type t = string

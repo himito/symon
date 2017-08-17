@@ -7,7 +7,6 @@ programming *ntcc* [1]. The underlying theory was published in:
     Constraint Programming. Electronic Notes in Theoretical Computer Science, 312, 161–177.
     https://doi.org/10.1016/j.entcs.2015.04.010.
 
-
 ## Installation
 
 ### Dependencies
@@ -18,10 +17,10 @@ We recommend to install the following dependencies using the package manager [op
   brew install opam
 ```
 
- * [Ocaml](http://ocaml.org)
- * Ocamllex
- * [Menhir](http://gallium.inria.fr/~fpottier/menhir/)
- * [OCamlgraph](http://ocamlgraph.lri.fr)
+* [Ocaml](http://ocaml.org)
+* Ocamllex
+* [Menhir](http://gallium.inria.fr/~fpottier/menhir/)
+* [OCamlgraph](http://ocamlgraph.lri.fr)
 
 ### Build
 

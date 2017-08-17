@@ -6,11 +6,13 @@ open Types
 
 (* auxiliar functions *)
 let test_equal a b = fun _ -> assert_equal a b
+let test_equal_state a b = fun _ -> assert_equal ~cmp: StateSet.equal a b
 let test_failure msg f = (fun _ -> assert_raises (Failure msg) (fun () -> f))
 let constraint_ c = Constraint (Atomic c)
 let conjugation_ a b = And_L (constraint_ a, constraint_ b)
 let disjunction_ a b = Or_L (constraint_ a, constraint_ b)
 let ntcc_process = Tell (Atomic "c")
+let state_ = StateSet.of_list [Present (Atomic "c"); Absent (Atomic "d") ]
 
 (* tests for the function build_list *)
 let test_build_list = [
@@ -62,6 +64,28 @@ let test_distribute_next = [
   "Disjunction" >:: test_equal (Or_L (Next_L (constraint_ "c1"), Next_L (constraint_ "c2"))) (distribute_next (disjunction_ "c1" "c2"))
 ]
 
+(* tests for the function value_to_status *)
+let test_value_to_status = [
+  "Preset" >:: test_equal Status.Present (value_to_status (Present (Atomic "c")));
+  "Absent" >:: test_equal Status.Absent (value_to_status (Absent (Atomic "c")));
+]
+
+(* tests for the function positive_part *)
+let test_positive_part = [
+  "Two element" >:: test_equal_state (StateSet.of_list [Present (Atomic "c")]) (positive_part state_)
+]
+
+(* tests for the function negative_part *)
+let test_negative_part = [
+  "Two elements" >:: test_equal_state (StateSet.of_list [Absent (Atomic "d")]) (negative_part state_)
+]
+
+(* tests for the function equivalent_states *)
+let test_equivalent_states = [
+  "Equivalent" >:: test_equal true (equivalent_states state_ state_);
+  "Not Equivalent" >:: test_equal false (equivalent_states state_ (StateSet.of_list [Absent (Atomic "d")]))
+]
+
 (* suite of tests *)
 let suite = [
   "Function build_list" >::: test_build_list;
@@ -70,4 +94,8 @@ let suite = [
   "Function string_of_process" >::: test_string_of_process;
   "Function unfold_next" >::: test_unfold_next;
   "Function distribute_next" >::: test_distribute_next;
+  "Function value_to_status" >::: test_value_to_status;
+  "Function positive_part" >::: test_positive_part;
+  "Function negative_part" >::: test_negative_part;
+  "Function equivalent_states" >::: test_equivalent_states;
 ]
