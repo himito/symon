@@ -16,14 +16,14 @@ let test_string_of_formula = [
   "Not" >:: test_equal "¬c" (string_of_formula (Not (constraint_ "c")));
   "And" >:: test_equal "(c1 /\\ c2)" (string_of_formula (And (constraint_ "c1", constraint_ "c2")));
   "Or" >:: test_equal "[c1] \\/ [c2]" (string_of_formula (Or (constraint_ "c1", constraint_ "c2")));
-  "Next" >:: test_equal "o(c)" (string_of_formula (Next_L (constraint_ "c")));
+  "Next" >:: test_equal "X(c)" (string_of_formula (X (constraint_ "c")));
 ]
 
 (*  tests for the function distribute_next *)
 let test_distribute_next = [
-  "Otherwise" >:: test_equal (Next_L (constraint_ "c")) (distribute_next (constraint_ "c"));
-  "Conjugation" >:: test_equal (And (Next_L (constraint_ "c1"), Next_L (constraint_ "c2"))) (distribute_next (conjugation_ "c1" "c2"));
-  "Disjunction" >:: test_equal (Or (Next_L (constraint_ "c1"), Next_L (constraint_ "c2"))) (distribute_next (disjunction_ "c1" "c2"))
+  "Otherwise" >:: test_equal (X (constraint_ "c")) (distribute_next (constraint_ "c"));
+  "Conjugation" >:: test_equal (And (X (constraint_ "c1"), X (constraint_ "c2"))) (distribute_next (conjugation_ "c1" "c2"));
+  "Disjunction" >:: test_equal (Or (X (constraint_ "c1"), X (constraint_ "c2"))) (distribute_next (disjunction_ "c1" "c2"))
 ]
 
 (* tests for the function list_to_and *)

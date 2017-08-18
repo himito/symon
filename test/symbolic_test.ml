@@ -25,9 +25,9 @@ let asynchronous_behavior = Parallel (Star (Tell (Atom_C "error")), Bang (Choice
 
 let test_symbolic_model = [
   "Tell" >:: test_equal_model (Constraint (Atom_C "c")) (Tell (Atom_C "c"));
-  "Next" >:: test_equal_model (Next_L (constraint_ "c")) (Next (Tell (Atom_C "c")));
+  "Next" >:: test_equal_model (X (constraint_ "c")) (Next (Tell (Atom_C "c")));
   "Parallel" >:: test_equal_model (And (constraint_ "c", constraint_ "d")) (Parallel (Tell (Atom_C "c"), Tell (Atom_C "d")));
-  "Unless" >:: test_equal_model (Or (And (Not (Constraint (Atom_C "c")), Next_L (Constraint (Atom_C "c"))), Constraint (Atom_C "c"))) (Unless (Atom_C "c", Tell (Atom_C "c")));
+  "Unless" >:: test_equal_model (Or (And (Not (Constraint (Atom_C "c")), X (Constraint (Atom_C "c"))), Constraint (Atom_C "c"))) (Unless (Atom_C "c", Tell (Atom_C "c")));
   "When" >::  test_equal_model (Or (Not (constraint_ "c"), And (constraint_ "c", constraint_ "d"))) (Choice [(Atom_C "c", Tell (Atom_C "d"))])
 ]
 

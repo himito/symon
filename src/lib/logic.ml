@@ -1,15 +1,16 @@
 (** Module implementing the Constraing Temporal Logic (CLTL) *)
 
 open Constraint
+open Utils
 
-(** Constraint Temporal Logic (CLTL) *)
-type formula_t = Constraint of constraint_t
-               | And of formula_t * formula_t
-               | Or of formula_t * formula_t
-               | Not of formula_t
-               | Next_L of formula_t
-               | True
-               | False
+(** Constraint Temporal Logic (CLTL) formula *)
+type formula_t = Constraint of constraint_t    (** contraint *)
+               | And of formula_t * formula_t  (** [and] logic operator *)
+               | Or of formula_t * formula_t   (** [or] logic operator *)
+               | Not of formula_t              (** [not] logic operator *)
+               | X of formula_t                (** [Next] temporal operator*)
+               | True                          (** [true] logic constant *)
+               | False                         (** [false] logic constant *)
 
 (** Returns the string representation of a formula *)
 let rec string_of_formula (f:formula_t) : string =
@@ -18,22 +19,48 @@ let rec string_of_formula (f:formula_t) : string =
   | Not f -> "¬" ^ (string_of_formula f)
   | And (f1, f2) -> Printf.sprintf "(%s /\\ %s)" (string_of_formula f1) (string_of_formula f2)
   | Or (f1,f2) -> Printf.sprintf "[%s] \\/ [%s]" (string_of_formula f1) (string_of_formula f2)
-  | Next_L f1 -> Printf.sprintf "o(%s)" (string_of_formula f1)
-  | _ -> failwith "function string_of_formula does not support the constructor"
+  | X f1 -> Printf.sprintf "X(%s)" (string_of_formula f1)
+  | True -> "T"
+  | False -> "F"
 
+
+(** A formulas set *)
+module FormulaSet = Set.Make (
+  struct
+    let compare = Pervasives.compare
+    type t = formula_t 
+  end
+)
+
+(** A set of formulas set *)
+module SetFormulaSet = Set.Make (
+  struct
+    let compare = Pervasives.compare
+    type t = FormulaSet.t
+  end
+)
+
+(** Returns the string representation of a set of formulas *)
+let string_of_formulas_set (s:FormulaSet.t) : string =
+  let list_formulas = List.map string_of_formula (FormulaSet.elements s) in
+  Printf.sprintf "{ %s }" (String.concat ","  list_formulas)
+
+(** Returns the string representation of a set of formula sets *)
+let string_of_set_formulas_set (s:SetFormulaSet.t) : string =
+  let list_formulas_set = List.map string_of_formulas_set (SetFormulaSet.elements s) in
+  Printf.sprintf "{ %s }" (String.concat "," list_formulas_set)
 
 (** Propagates a [Next] operator inside a formula *)
 let rec distribute_next (f:formula_t) : formula_t =
   match f with
     Or (a,b) -> Or ((distribute_next a), (distribute_next b))
   | And (a,b) -> And ((distribute_next a), (distribute_next b))
-  | _ -> Next_L f
+  | _ -> X f
 
 let simplify_base (f:formula_t) : formula_t =
   match f with
     Not False -> True
   | Not True -> False
-  | Not(Not p) -> p
   | And(p, False) | And(False, p) -> False
   | And(p, True) | And(True, p) -> p
   | Or(p, False) | Or(False, p) -> p
@@ -77,16 +104,36 @@ let rec or_to_list (f:formula_t) : formula_t list =
   match f with Or(p,q) -> or_to_list p @ and_to_list q | _ -> [f]
 
 (** Applies distribute law to a formula*)
-let rec distribute_law (f: formula_t) : formula_t =
-  match f with
-    And(p, (Or(q,r))) -> mk_or (distribute_law (And(p,q))) (distribute_law (And(p,r)))
-  | And(Or(p,q), r) -> mk_or (distribute_law (And(p,r))) (distribute_law (And(q,r)))
-  | _ -> f
+let rec distribute_law (s1: SetFormulaSet.t) (s2: SetFormulaSet.t) : SetFormulaSet.t =
+  let allparis = cartesian_product (SetFormulaSet.elements s1) (SetFormulaSet.elements s2) in
+  SetFormulaSet.of_list (List.map (fun (e1, e2) -> FormulaSet.union e1 e2) allparis)
+
+(** Negates a formula *)
+let negate = function (Not p ) -> p | p -> Not p
+
+(** Returns if a formula is negative *)
+let negative = function (Not p) -> true | _ -> false
+
+(** Returns if a formula is positive *)
+let positive (f:formula_t) = not (negative f) 
+
+(** Returns if a formula has no complementary literals *)
+let consistent_formula (f: FormulaSet.t) : bool =
+  let pos, neg = FormulaSet.partition positive f in
+  let double_neg = FormulaSet.of_list (List.map negate (FormulaSet.elements neg)) in
+  FormulaSet.is_empty (FormulaSet.inter pos double_neg)
 
 (** Translates a formula into its Disjunctive Normal Form (DNF) *)
-let rec dnf (f:formula_t) : formula_t =
+let rec dnf_ (f:formula_t) : SetFormulaSet.t =
   match f with
-    And(p,q) -> distribute_law (And(dnf p, dnf q))
-  | Or(p,q) -> Or(dnf p, dnf q)
-  | _-> f
+    And(p,q) -> distribute_law (dnf_ p) (dnf_ q)
+  | Or(p,q) -> SetFormulaSet.union (dnf_ p) (dnf_ q)
+  | False -> SetFormulaSet.empty
+  | True -> SetFormulaSet.singleton FormulaSet.empty
+  | _-> SetFormulaSet.singleton (FormulaSet.singleton f)
 
+(** Returns the simplfied DNF of a formula *)
+let dnf (f:formula_t) : formula_t =
+  let dnf_simplified = SetFormulaSet.filter consistent_formula (dnf_ f) in
+  let dnf_list = List.map FormulaSet.elements (SetFormulaSet.elements dnf_simplified) in
+  list_to_or (List.map list_to_and dnf_list)

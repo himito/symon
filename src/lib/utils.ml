@@ -7,6 +7,9 @@ let rec build_list (i:int) (n:int) : 'i list =
   else
     []
 
+(** Cartesian product of two lists *)
+let cartesian_product l1 l2 = 
+    List.concat (List.map (fun e -> List.map (fun e2 -> (e,e2)) l2) l1)
 
 (*
 (** pretty representation of the symbolic representation *)

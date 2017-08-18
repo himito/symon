@@ -8,9 +8,9 @@ open Logic
 let rec symbolic_model (ntcc_p:ntcc_process_t) : formula_t =
   match ntcc_p with
   | Tell c -> Constraint c
-  | Next p -> Next_L (symbolic_model p)
+  | Next p -> X (symbolic_model p)
   | Parallel (p1, p2) -> And (symbolic_model p1, symbolic_model p2)
-  | Unless (c, p) -> let next_part = Next_L (symbolic_model p) in
+  | Unless (c, p) -> let next_part = X (symbolic_model p) in
                      Or (And (Not (Constraint c), next_part), Constraint c)
   | Choice l -> let c_list, _ = List.split l in
                 let and_part_list = List.map (fun (c, p) -> And (Constraint c, symbolic_model p)) l in
@@ -144,7 +144,7 @@ let rec getBetter formula n=
   match formula with
   | Cons c -> [[(Cons_S c, n)]]
   | Abs c -> [[(Abs_S c, n)]]
-  | Next_L l -> getBetter l (n+1)
+  | X l -> getBetter l (n+1)
   | And (a,b) -> cross (getBetter a n) (getBetter b n)
   | Or (a,b) -> (getBetter a n)@(getBetter b n)
 
@@ -160,7 +160,7 @@ let eliminateCon c =
 
 let reduceFormula formula =
   let rec addNext c n =
-    if n = 0 then c else Next_L ((addNext c (n-1)))
+    if n = 0 then c else X ((addNext c (n-1)))
   in
   let r = getBetter formula 0
   in
@@ -310,8 +310,8 @@ let symbolic_model ntcc_program =
     | Tell c -> Cons c
     | Choice l -> choiceSymbolic l level
     | Parallel (p,q) -> And ((getSymbolicModel p level),(getSymbolicModel q level))
-    | Next p -> Next_L (getSymbolicModel p level)
-    | Unless (c,p) -> Or((And (Abs c, Next_L (getSymbolicModel p level))), Cons c)
+    | Next p -> X (getSymbolicModel p level)
+    | Unless (c,p) -> Or((And (Abs c, X (getSymbolicModel p level))), Cons c)
     | Star p ->
         let x0 = Cons False in
         let lts = newLTS 300 in
