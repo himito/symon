@@ -41,7 +41,7 @@ let rec string_of_process (p:ntcc_process_t) : string =
   | Next p -> Printf.sprintf "next(%s)" (string_of_process p)
   | Star p -> Printf.sprintf "*(%s)" (string_of_process p)
   | Bang p -> Printf.sprintf "!(%s)" (string_of_process p)
-  | Unless (c, p) -> Printf.sprintf "unless (%s) %s" (string_of_constraint c) (string_of_process p)
+  | Unless (c, p) -> Printf.sprintf "unless (%s) next(%s)" (string_of_constraint c) (string_of_process p)
   | Choice l -> Printf.sprintf "{ %s }" (String.concat " + " (List.map string_of_choice l))
   | Skip -> "skip"
 
@@ -54,6 +54,20 @@ let rec string_of_formula (f:formula_t) : string =
   | Or_L (f1,f2) -> Printf.sprintf "[%s] v [%s]" (string_of_formula f1) (string_of_formula f2)
   | Next_L f1 -> Printf.sprintf "o(%s)" (string_of_formula f1)
   | _ -> failwith "function string_of_formula does not support the constructor"
+
+(** Generates a formula by concatenating each element of the list with an AND *)
+let list_to_and (l:formula_t list) : formula_t =
+  if List.length l == 0 then
+    failwith "List is empty"
+  else
+    List.fold_left (fun acc e -> if acc == True_L then e else And_L (e, acc)) True_L l
+
+(** Generate a formula by concatenating each element of the list with an OR *)
+let list_to_or (l:formula_t list) : formula_t =
+  if List.length l == 0 then
+    failwith "List is empty"
+  else
+    List.fold_left (fun acc e -> if acc == False_L then e else Or_L (e, acc)) False_L l
 
 (** Returns the positive part of a LTS state *)
 let positive_part (state:state_t) : state_formula_t =
@@ -72,7 +86,6 @@ let equivalent_states (s1:state_t) (s2:state_t) : bool =
 let check_state_consistency (s:state_t) : bool =
   let inconsistent_c = ConstraintSet.inter (positive_part s) (negative_part s) in
   ConstraintSet.is_empty inconsistent_c
-
 
 (*
 (* function that converts a state of a lts into a string *)

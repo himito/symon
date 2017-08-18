@@ -34,6 +34,8 @@ type ntcc_process_t = Tell of constraint_t
 (** Parsed NTCC program *)
 type ntcc_program = Some of ntcc_process_t | Empty
 
+
+
 (** Set of constraints *)
 module ConstraintSet = Set.Make(
   struct
@@ -50,6 +52,18 @@ type state_t = {
   positive : state_formula_t;
   negative : state_formula_t
 }
+
+(** Node of the LTS *)
+module Vertex = 
+    struct
+      type t = state_t
+      let compare = Pervasives.compare
+      let hash = Hashtbl.hash
+      let equal = (=)
+    end
+
+(** Definition of the LTS *)
+module Graph = Graph.Imperative.Digraph.ConcreteBidirectional (Vertex)
 
 (*
 (** pretty representation of the symbolic representation *)

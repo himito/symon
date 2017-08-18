@@ -46,7 +46,7 @@ let test_string_of_process = [
   "Next" >:: test_equal "next(tell(c))" (string_of_process (Next (Tell (Atomic "c"))));
   "Start" >:: test_equal "*(tell(c))" (string_of_process (Star (Tell (Atomic "c"))));
   "Bang" >:: test_equal "!(tell(c))" (string_of_process (Bang (Tell (Atomic "c"))));
-  "Unless" >:: test_equal "unless (c) next(tell(c))" (string_of_process (Unless (Atomic "c", Next (Tell (Atomic "c")))));
+  "Unless" >:: test_equal "unless (c) next(tell(c))" (string_of_process (Unless (Atomic "c", Tell (Atomic "c"))));
   "Skip" >:: test_equal "skip" (string_of_process Skip);
   "Choice" >:: test_equal "{ when (c) do tell(c1) }" (string_of_process (Choice [(Atomic "c", Tell (Atomic "c1"))]))
 ]
@@ -86,6 +86,18 @@ let test_check_state_consistency = [
   "Consistent" >:: test_equal true (check_state_consistency state_)
 ]
 
+(* tests for the function list_to_and *)
+let test_list_to_and = [
+  "One Element" >:: test_equal (constraint_ "c") (list_to_and [(constraint_ "c")]);
+  "Two Element" >:: test_equal (And_L (constraint_ "d", constraint_ "c")) (list_to_and [constraint_ "c"; constraint_ "d"]);
+]
+
+(* tests for the function list_to_or *)
+let test_list_to_or = [
+  "One Element" >:: test_equal (constraint_ "c") (list_to_or [constraint_ "c"]);
+  "Two Element" >:: test_equal (Or_L (constraint_ "d", constraint_ "c")) (list_to_or [constraint_ "c"; constraint_ "d"]);
+]
+
 (* suite of tests *)
 let suite = [
   "Function build_list" >::: test_build_list;
@@ -98,4 +110,6 @@ let suite = [
   "Function negative_part" >::: test_negative_part;
   "Function equivalent_states" >::: test_equivalent_states; 
   "Function check_state_consistency" >::: test_check_state_consistency;
+  "Function list_to_and" >::: test_list_to_and;
+  "Function list_to_or" >::: test_list_to_or;
 ]

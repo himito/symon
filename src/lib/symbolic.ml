@@ -5,8 +5,18 @@ open Types
 open Utils
 
 (** Returns the symbolic representation of a NTCC process *)
-let symbolic_model (ntcc_proc:ntcc_process_t) : formula_t =
-  Constraint (Atomic "ok")
+let rec symbolic_model (ntcc_p:ntcc_process_t) : formula_t =
+  match ntcc_p with
+  | Tell c -> Constraint c
+  | Next p -> Next_L (symbolic_model p)
+  | Parallel (p1, p2) -> And_L (symbolic_model p1, symbolic_model p2)
+  | Unless (c, p) -> let next_part = Next_L (symbolic_model p) in
+                     Or_L (And_L (Negation (Constraint c), next_part), Constraint c)
+  | Choice l -> let c_list, _ = List.split l in
+                let and_part_list = List.map (fun (c, p) -> And_L (Constraint c, symbolic_model p)) l in
+                let neg_part_list = List.map (fun c -> Negation (Constraint c)) c_list in
+                Or_L (list_to_and neg_part_list, list_to_or and_part_list)
+  | _ -> failwith "Not implemented"
 
 (* 
 (** function that returns a new hashtbl of a specific size *)
