@@ -21,7 +21,7 @@ Executable symon
 
 Library symon_lib 
   Path: src/lib
-  Modules: Types, Utils, Symbolic
+  Modules: Constraint, Ntcc, Logic, Lts, Symbolic, Utils
   InternalModules: Lexer, Parser
   BuildTools: ocamlbuild
   BuildDepends: ocamlgraph, str
@@ -42,6 +42,6 @@ Document api
   Type:                 OCamlbuild (0.4)
   BuildTools:           ocamldoc, ocamlbuild
   XOCamlbuildPath:      doc
-  XOCamlbuildModules:   Types, Utils, Symbolic
+  XOCamlbuildModules:   Constraint, Logic, Symbolic, Ntcc, Utils
   XOCamlbuildExtraArgs: -I src/lib
   Install:              false

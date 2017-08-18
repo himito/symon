@@ -4,8 +4,12 @@ open OUnit2
 
 (*  suite of tests *)
 let suite = "All" >::: [
-  "Utils module" >::: Utils_test.suite;
+  "Constraint module" >::: Constraint_test.suite;
+  "Logic module" >::: Logic_test.suite;
+  "LTS module" >::: Lts_test.suite;
+  "NTCC module" >::: Ntcc_test.suite;
   "Symbolic module">::: Symbolic_test.suite;
+  "Utils module" >::: Utils_test.suite;
   ]
 
 (* test runner *)

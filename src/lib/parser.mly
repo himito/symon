@@ -6,11 +6,12 @@
 %left AND PARALLEL
 
 %{
-  open Types
+  open Ntcc 
+  open Constraint
   open Utils
 %}
 
-%start <Types.ntcc_program> main
+%start <Ntcc.ntcc_program> main
 
 %%
 
@@ -19,7 +20,7 @@ main:
   | EOF       { Empty }
 
 constr_expr:
-  | CONSTRAINT { Atomic ($1) }
+  | CONSTRAINT { Atom_C ($1) }
   | c1 = constr_expr AND c2 = constr_expr { And_C (c1, c2) }
   | FALSE { False_C }
   | TRUE  { True_C }

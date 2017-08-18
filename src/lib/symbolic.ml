@@ -1,21 +1,21 @@
 (** Module that contains the implementation of the symbolic representation of
     NTCC processes *)
 
-open Types
-open Utils
+open Ntcc 
+open Logic
 
 (** Returns the symbolic representation of a NTCC process *)
 let rec symbolic_model (ntcc_p:ntcc_process_t) : formula_t =
   match ntcc_p with
   | Tell c -> Constraint c
   | Next p -> Next_L (symbolic_model p)
-  | Parallel (p1, p2) -> And_L (symbolic_model p1, symbolic_model p2)
+  | Parallel (p1, p2) -> And (symbolic_model p1, symbolic_model p2)
   | Unless (c, p) -> let next_part = Next_L (symbolic_model p) in
-                     Or_L (And_L (Negation (Constraint c), next_part), Constraint c)
+                     Or (And (Not (Constraint c), next_part), Constraint c)
   | Choice l -> let c_list, _ = List.split l in
-                let and_part_list = List.map (fun (c, p) -> And_L (Constraint c, symbolic_model p)) l in
-                let neg_part_list = List.map (fun c -> Negation (Constraint c)) c_list in
-                Or_L (list_to_and neg_part_list, list_to_or and_part_list)
+                let and_part_list = List.map (fun (c, p) -> And (Constraint c, symbolic_model p)) l in
+                let neg_part_list = List.map (fun c -> Not (Constraint c)) c_list in
+                Or (list_to_and neg_part_list, list_to_or and_part_list)
   | _ -> failwith "Not implemented"
 
 (* 
@@ -59,7 +59,7 @@ let completeFormula2 (f:pretty_state) =
     for i = 0 to (max) do
       let elements = List.filter (fun (x,k) -> k=i ) l in
       if (List.length elements) = 0 then
-        r := !r@[(Cons_S (Atomic ("st_"^(string_of_int (i+1)))),i)]
+        r := !r@[(Cons_S (Atom_C ("st_"^(string_of_int (i+1)))),i)]
       else
         r := !r@elements
     done;
@@ -145,16 +145,16 @@ let rec getBetter formula n=
   | Cons c -> [[(Cons_S c, n)]]
   | Abs c -> [[(Abs_S c, n)]]
   | Next_L l -> getBetter l (n+1)
-  | And_L (a,b) -> cross (getBetter a n) (getBetter b n)
-  | Or_L (a,b) -> (getBetter a n)@(getBetter b n)
+  | And (a,b) -> cross (getBetter a n) (getBetter b n)
+  | Or (a,b) -> (getBetter a n)@(getBetter b n)
 
 
 
 
 let eliminateCon c =
   match c with
-  | And_L (c1,c2) -> if c1 = Cons True then c2 else if c2 = Cons True then c1 else c
-  | Or_L (c1,c2) -> if c1 = Cons False then c2 else if c2 = Cons False then c1 else c
+  | And (c1,c2) -> if c1 = Cons True then c2 else if c2 = Cons True then c1 else c
+  | Or (c1,c2) -> if c1 = Cons False then c2 else if c2 = Cons False then c1 else c
   | _ -> c
 
 
@@ -166,11 +166,11 @@ let reduceFormula formula =
   in
   let reduction = List.fold_left
     (fun c1 l1 ->
-      eliminateCon (Or_L ((eliminateCon c1), (eliminateCon (List.fold_left
+      eliminateCon (Or ((eliminateCon c1), (eliminateCon (List.fold_left
                 (fun c2 (c3,n) ->
                   match c3 with
-                  | Cons_S c -> And_L ((eliminateCon c2), (addNext (Cons c) n ))
-                  | Abs_S c -> And_L ((eliminateCon c2), (addNext (Abs c) n))
+                  | Cons_S c -> And ((eliminateCon c2), (addNext (Cons c) n ))
+                  | Abs_S c -> And ((eliminateCon c2), (addNext (Abs c) n))
                 )
                 (Cons True)
                 l1))
@@ -184,7 +184,7 @@ let reduceFormula formula =
 let rec labeling p_ntcc n =
   let rec dist_n const i =
     match const with
-    | Atomic c -> Atomic (c^"_"^(string_of_int i))
+    | Atom_C c -> Atom_C (c^"_"^(string_of_int i))
     | And (a,b) -> And ((dist_n a i),(dist_n b i))
     | True -> True
     | False -> False
@@ -197,7 +197,7 @@ let rec labeling p_ntcc n =
   | Unless (c,p) -> Unless ((dist_n c n),(labeling p (n+1)))
   | Bang p -> Bang (labeling p n)
   | Choice l -> Choice (List.map (fun (c,p) -> ((dist_n c n),(labeling p n))) l)
-  | _ -> Tell (Atomic "Error")
+  | _ -> Tell (Atom_C "Error")
 
 
 
@@ -248,7 +248,7 @@ let symbolic_model ntcc_program =
 (* --------------------------------------------------------------------------------------------------------*)
   let rec getGreatestFixPoint s y lts level=
     let new_lts = makeCopy lts in
-    let new_y = reduceFormula (if y = Cons True then s else And_L (s, distribute_next y)) in
+    let new_y = reduceFormula (if y = Cons True then s else And (s, distribute_next y)) in
     (* let _ = print_string ("mirar aqui ->"^(string_of_formula new_y)^"\n") in *)
     List.iter (addFormula2LTS new_lts) (List.map completeFormula (getBetter new_y 0));
     (* print_string "Anterior\n"; *)
@@ -275,7 +275,7 @@ let symbolic_model ntcc_program =
 (* --------------------------------------------------------------------------------------------------------*)
   let rec getLeastFixPoint s x lts =
     let new_lts = makeCopy lts in
-    let new_x = reduceFormula (if x = Cons False then s else Or_L (s, distribute_next x)) in
+    let new_x = reduceFormula (if x = Cons False then s else Or (s, distribute_next x)) in
     List.iter (addFormula2LTS new_lts) (List.map completeFormula (getBetter new_x 0));
     if (lts = new_lts) then
       (* begin *)
@@ -291,27 +291,27 @@ let symbolic_model ntcc_program =
       Abs c
     in
     let term_positive (c,p) =
-      And_L (Cons c, (getSymbolicModel p (level+1)))
+      And (Cons c, (getSymbolicModel p (level+1)))
     in
     let choiceNegative w1 l =
-      List.fold_left (fun f w -> And_L (f,term_negative w)) (term_negative w1) l
+      List.fold_left (fun f w -> And (f,term_negative w)) (term_negative w1) l
     in
     let choicePositive w1 l =
-      List.fold_left (fun f w -> Or_L (f, term_positive w)) (term_positive w1) l
+      List.fold_left (fun f w -> Or (f, term_positive w)) (term_positive w1) l
     in
     let w1 = List.hd l in
     if (List.length l) == 1 then
-      Or_L (term_negative w1, term_positive w1)
+      Or (term_negative w1, term_positive w1)
     else
       let l2 = List.tl l in
-      Or_L ((choiceNegative w1 l2),(choicePositive w1 l2))
+      Or ((choiceNegative w1 l2),(choicePositive w1 l2))
   in
     match ntcc_proc with
     | Tell c -> Cons c
     | Choice l -> choiceSymbolic l level
-    | Parallel (p,q) -> And_L ((getSymbolicModel p level),(getSymbolicModel q level))
+    | Parallel (p,q) -> And ((getSymbolicModel p level),(getSymbolicModel q level))
     | Next p -> Next_L (getSymbolicModel p level)
-    | Unless (c,p) -> Or_L((And_L (Abs c, Next_L (getSymbolicModel p level))), Cons c)
+    | Unless (c,p) -> Or((And (Abs c, Next_L (getSymbolicModel p level))), Cons c)
     | Star p ->
         let x0 = Cons False in
         let lts = newLTS 300 in
@@ -339,7 +339,7 @@ let symbolic_model ntcc_program =
         let complete =  states2logicK (List.map completeFormula (getBetter r 0)) in
         (* let _ = print_endline ("Complete : "^(string_of_formula (complete))^"\n") in *)
         complete
-    | _ -> Cons (Atomic "Error")
+    | _ -> Cons (Atom_C "Error")
   in
   let model =  (getSymbolicModel (labeling ntcc_program 1) 0) in
   if (deadEnd model) then addDeadEnd model else model *)

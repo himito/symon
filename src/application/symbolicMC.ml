@@ -6,7 +6,7 @@
   @version 1.0
  *)
 
-open Types
+open Ntcc
 open Lexer
 open Utils 
 (* open Symbolic *)
@@ -35,10 +35,10 @@ let ntcc_program =
 let _ = Printf.printf "Formula: \n  %s\n" (string_of_formula symbolic_model) *)
 
 (* let getLatex model  =
-  let getAtomicLatex a =
+  let getAtom_CLatex a =
     let rec getConstraintLatex c =
       match c with
-      | Atomic a -> let l = Str.split (Str.regexp_string "_") a  in (List.hd l)^"_{"^(List.hd (List.rev l))^"}"
+      | Atom_C a -> let l = Str.split (Str.regexp_string "_") a  in (List.hd l)^"_{"^(List.hd (List.rev l))^"}"
       | And (a,b) -> (getConstraintLatex a)^" \\wedge "^(getConstraintLatex b)
       | True -> "\\mathtt{true}"
       | False -> "\\mathtt{false}"
@@ -54,7 +54,7 @@ let _ = Printf.printf "Formula: \n  %s\n" (string_of_formula symbolic_model) *)
     | (Abs_S c,n) -> (getNextLatex n )^"(\\neg("^(getConstraintLatex c)^"))"
   in
   let getSubFormula s =
-    List.fold_left (fun str a -> if str <> "" then (getAtomicLatex a)^" \\wedge "^str else (getAtomicLatex a) ) "" s
+    List.fold_left (fun str a -> if str <> "" then (getAtom_CLatex a)^" \\wedge "^str else (getAtom_CLatex a) ) "" s
   in
   let formula = getBetter model 0 in
   List.fold_left (fun str f -> if str <> "" then "\\{"^(getSubFormula f)^"\\} \\vee "^str else "\\{"^(getSubFormula f)^"\\}" ) "" formula
