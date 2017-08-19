@@ -23,22 +23,34 @@ let rec string_of_formula (f:formula_t) : string =
   | True -> "T"
   | False -> "F"
 
+(** Conjunction constructor function *)
+let mk_and (p:formula_t) (q:formula_t) : formula_t = And(p,q)
+
+(** Disjunction constructor function *)
+let mk_or (p:formula_t) (q:formula_t) : formula_t = Or(p,q)
+
+(** Negates a formula *)
+let negate = function (Not p ) -> p | p -> Not p
+
+(** Returns if a formula is negative *)
+let negative = function (Not p) -> true | _ -> false
+
+(** Returns if a formula is positive *)
+let positive (f:formula_t) = not (negative f) 
 
 (** A formulas set *)
 module FormulaSet = Set.Make (
   struct
     let compare = Pervasives.compare
     type t = formula_t 
-  end
-)
+  end)
 
 (** A set of formulas set *)
 module SetFormulaSet = Set.Make (
   struct
     let compare = Pervasives.compare
     type t = FormulaSet.t
-  end
-)
+  end)
 
 (** Returns the string representation of a set of formulas *)
 let string_of_formulas_set (s:FormulaSet.t) : string =
@@ -51,16 +63,17 @@ let string_of_set_formulas_set (s:SetFormulaSet.t) : string =
   Printf.sprintf "{ %s }" (String.concat "," list_formulas_set)
 
 (** Propagates a [Next] operator inside a formula *)
-let rec distribute_next (f:formula_t) : formula_t =
+let rec distributivity_next (f:formula_t) : formula_t =
   match f with
-    Or (a,b) -> Or ((distribute_next a), (distribute_next b))
-  | And (a,b) -> And ((distribute_next a), (distribute_next b))
-  | _ -> X f
+    X (Or (a,b)) -> Or (X (distributivity_next a), X (distributivity_next b))    (* X (p \/ q) <=> (X p) \/ (X q) *)
+  | X (And (a,b)) -> And (X (distributivity_next a), X (distributivity_next b))  (* X (p /\ q) <=> (X p) /\ (X q) *)
+  | _ -> f
 
-let simplify_base (f:formula_t) : formula_t =
+let simplify_trivial (f:formula_t) : formula_t =
   match f with
     Not False -> True
   | Not True -> False
+  | Not (Not p) -> p                         (* ¬¬p <=> p *)
   | And(p, False) | And(False, p) -> False
   | And(p, True) | And(True, p) -> p
   | Or(p, False) | Or(False, p) -> p
@@ -70,13 +83,31 @@ let simplify_base (f:formula_t) : formula_t =
 (** Simplify a formula *)
 let rec simplify_formula (f:formula_t) : formula_t =
   match f with
-    Not p -> simplify_base (Not (simplify_formula p))
-  | And(p, q) -> simplify_base (And (simplify_formula p, simplify_formula q))
-  | Or(p, q) -> simplify_base (Or (simplify_formula p, simplify_formula q))
+    Not p -> simplify_trivial (Not (simplify_formula p))
+  | X p -> simplify_trivial (X (simplify_formula p))
+  | And(p, q) -> simplify_trivial (And (simplify_formula p, simplify_formula q))
+  | Or(p, q) -> simplify_trivial (Or (simplify_formula p, simplify_formula q))
   | _ -> f
 
-(** And constructor function *)
-let mk_and p q = And(p,q)
+(** Nesting [X] operator *)
+let rec replicate_next (f:formula_t) (i:int) : formula_t =
+  match i with
+    0 -> f
+  | _ -> replicate_next (X f) (i-1)
+
+(** Returns the Negation Normal Form (NNF) of a formula *)
+let rec nnf (f:formula_t) (n:int) : formula_t = 
+  match f with 
+  | And (p, q) -> And (nnf p n, nnf q n)
+  | Or (p, q) -> Or (nnf p n, nnf q n)
+  | Not (Not p) -> nnf p n                                   (* De Morgan law *)
+  | Not (And (p, q)) -> Or (nnf (Not p) n, nnf (Not q) n)    (* De Morgan law *)
+  | Not (Or (p, q)) -> And (nnf (Not p) n, nnf (Not q) n)    (* De Morgan law *)
+  | Not (X p) -> nnf (Not p) (n+1)                           (* negation elimination*)
+  | X p -> nnf p (n+1)
+  | _ -> replicate_next f n
+
+let nnf (f:formula_t) : formula_t = nnf (simplify_formula f) 0 
 
 (** Generates a formula by concatenating each element of the list with an AND *)
 let list_to_and (l:formula_t list) : formula_t =
@@ -89,9 +120,6 @@ let list_to_and (l:formula_t list) : formula_t =
 let rec and_to_list (f:formula_t) : formula_t list =
   match f with And(p,q) -> and_to_list p @ and_to_list q | _ -> [f]
 
-(** Or constructor function *)
-let mk_or p q = Or(p,q)
-
 (** Generate a formula by concatenating each element of the list with an OR *)
 let list_to_or (l:formula_t list) : formula_t =
   if l == [] then
@@ -103,21 +131,12 @@ let list_to_or (l:formula_t list) : formula_t =
 let rec or_to_list (f:formula_t) : formula_t list =
   match f with Or(p,q) -> or_to_list p @ and_to_list q | _ -> [f]
 
-(** Applies distribute law to a formula*)
+(** Applies distribute law to a formula *)
 let rec distribute_law (s1: SetFormulaSet.t) (s2: SetFormulaSet.t) : SetFormulaSet.t =
   let allparis = cartesian_product (SetFormulaSet.elements s1) (SetFormulaSet.elements s2) in
   SetFormulaSet.of_list (List.map (fun (e1, e2) -> FormulaSet.union e1 e2) allparis)
 
-(** Negates a formula *)
-let negate = function (Not p ) -> p | p -> Not p
-
-(** Returns if a formula is negative *)
-let negative = function (Not p) -> true | _ -> false
-
-(** Returns if a formula is positive *)
-let positive (f:formula_t) = not (negative f) 
-
-(** Returns if a formula has no complementary literals *)
+(** Returns if a formula has no complementary elements *)
 let consistent_formula (f: FormulaSet.t) : bool =
   let pos, neg = FormulaSet.partition positive f in
   let double_neg = FormulaSet.of_list (List.map negate (FormulaSet.elements neg)) in

@@ -248,7 +248,7 @@ let symbolic_model ntcc_program =
 (* --------------------------------------------------------------------------------------------------------*)
   let rec getGreatestFixPoint s y lts level=
     let new_lts = makeCopy lts in
-    let new_y = reduceFormula (if y = Cons True then s else And (s, distribute_next y)) in
+    let new_y = reduceFormula (if y = Cons True then s else And (s, distributivity_next y)) in
     (* let _ = print_string ("mirar aqui ->"^(string_of_formula new_y)^"\n") in *)
     List.iter (addFormula2LTS new_lts) (List.map completeFormula (getBetter new_y 0));
     (* print_string "Anterior\n"; *)
@@ -275,7 +275,7 @@ let symbolic_model ntcc_program =
 (* --------------------------------------------------------------------------------------------------------*)
   let rec getLeastFixPoint s x lts =
     let new_lts = makeCopy lts in
-    let new_x = reduceFormula (if x = Cons False then s else Or (s, distribute_next x)) in
+    let new_x = reduceFormula (if x = Cons False then s else Or (s, distributivity_next x)) in
     List.iter (addFormula2LTS new_lts) (List.map completeFormula (getBetter new_x 0));
     if (lts = new_lts) then
       (* begin *)

@@ -19,11 +19,11 @@ let test_string_of_formula = [
   "Next" >:: test_equal "X(c)" (string_of_formula (X (constraint_ "c")));
 ]
 
-(*  tests for the function distribute_next *)
+(*  tests for the function distributivity_next *)
 let test_distribute_next = [
-  "Otherwise" >:: test_equal (X (constraint_ "c")) (distribute_next (constraint_ "c"));
-  "Conjugation" >:: test_equal (And (X (constraint_ "c1"), X (constraint_ "c2"))) (distribute_next (conjugation_ "c1" "c2"));
-  "Disjunction" >:: test_equal (Or (X (constraint_ "c1"), X (constraint_ "c2"))) (distribute_next (disjunction_ "c1" "c2"))
+  "Otherwise" >:: test_equal (X (constraint_ "c")) (distributivity_next (X (constraint_ "c")));
+  "Conjugation" >:: test_equal (And (X (constraint_ "c1"), X (constraint_ "c2"))) (distributivity_next (X (conjugation_ "c1" "c2")));
+  "Disjunction" >:: test_equal (Or (X (constraint_ "c1"), X (constraint_ "c2"))) (distributivity_next (X (disjunction_ "c1" "c2")));
 ]
 
 (* tests for the function list_to_and *)
@@ -41,7 +41,7 @@ let test_list_to_or = [
 (* suite of tests *)
 let suite = [
   "Function string_of_formula" >::: test_string_of_formula;
-  "Function distribute_next" >::: test_distribute_next;
+  "Function distributivity_next" >::: test_distribute_next;
   "Function list_to_and" >::: test_list_to_and;
   "Function list_to_or" >::: test_list_to_or;
 ]
