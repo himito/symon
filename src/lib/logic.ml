@@ -1,10 +1,10 @@
-(** Module implementing the Constraing Temporal Logic (CLTL) *)
+(** Module implementing the Constraint Temporal Logic (CLTL) *)
 
 open Constraint
 open Utils
 
 (** Constraint Temporal Logic (CLTL) formula *)
-type formula_t = Constraint of constraint_t    (** contraint *)
+type formula_t = Constraint of constraint_t    (** constraint *)
                | And of formula_t * formula_t  (** [and] logic operator *)
                | Or of formula_t * formula_t   (** [or] logic operator *)
                | Not of formula_t              (** [not] logic operator *)
@@ -26,7 +26,7 @@ let rec string_of_formula (f:formula_t) : string =
 (** Conjunction constructor function *)
 let mk_and (p:formula_t) (q:formula_t) : formula_t = And(p,q)
 
-(** Disjunction constructor function *)
+(** Disjunctive constructor function *)
 let mk_or (p:formula_t) (q:formula_t) : formula_t = Or(p,q)
 
 (** Negates a formula *)
@@ -62,13 +62,7 @@ let string_of_set_formulas_set (s:SetFormulaSet.t) : string =
   let list_formulas_set = List.map string_of_formulas_set (SetFormulaSet.elements s) in
   Printf.sprintf "{ %s }" (String.concat "," list_formulas_set)
 
-(** Propagates a [Next] operator inside a formula *)
-let rec distributivity_next (f:formula_t) : formula_t =
-  match f with
-    X (Or (a,b)) -> Or (X (distributivity_next a), X (distributivity_next b))    (* X (p \/ q) <=> (X p) \/ (X q) *)
-  | X (And (a,b)) -> And (X (distributivity_next a), X (distributivity_next b))  (* X (p /\ q) <=> (X p) /\ (X q) *)
-  | _ -> f
-
+(* Simplify trivialities *)
 let simplify_trivial (f:formula_t) : formula_t =
   match f with
     Not False -> True
@@ -127,14 +121,14 @@ let list_to_or (l:formula_t list) : formula_t =
   else
     simplify_formula (List.fold_left mk_or False l)
 
-(* Breaks down a disjunction into a list of disjuncts *)
+(* Breaks down a disjunctive into a list of disjuncts *)
 let rec or_to_list (f:formula_t) : formula_t list =
   match f with Or(p,q) -> or_to_list p @ and_to_list q | _ -> [f]
 
 (** Applies distribute law to a formula *)
 let rec distribute_law (s1: SetFormulaSet.t) (s2: SetFormulaSet.t) : SetFormulaSet.t =
-  let allparis = cartesian_product (SetFormulaSet.elements s1) (SetFormulaSet.elements s2) in
-  SetFormulaSet.of_list (List.map (fun (e1, e2) -> FormulaSet.union e1 e2) allparis)
+  let all_pairs = cartesian_product (SetFormulaSet.elements s1) (SetFormulaSet.elements s2) in
+  SetFormulaSet.of_list (List.map (fun (e1, e2) -> FormulaSet.union e1 e2) all_pairs)
 
 (** Returns if a formula has no complementary elements *)
 let consistent_formula (f: FormulaSet.t) : bool =
@@ -151,7 +145,7 @@ let rec dnf_ (f:formula_t) : SetFormulaSet.t =
   | True -> SetFormulaSet.singleton FormulaSet.empty
   | _-> SetFormulaSet.singleton (FormulaSet.singleton f)
 
-(** Returns the simplfied DNF of a formula *)
+(** Returns the simplified DNF of a formula *)
 let dnf (f:formula_t) : formula_t =
   let dnf_simplified = SetFormulaSet.filter consistent_formula (dnf_ f) in
   let dnf_list = List.map FormulaSet.elements (SetFormulaSet.elements dnf_simplified) in
