@@ -4,7 +4,7 @@ open OUnit2
 open Constraint
 open Logic
 
-(* auxiliar functions *)
+(* auxiliary functions *)
 let test_equal a b = fun _ -> assert_equal a b
 let constraint_ c = Constraint (Atom_C c)
 let conjugation_ a b = And (constraint_ a, constraint_ b)
