@@ -5,9 +5,9 @@ open Constraint
 open Symbolic
 open Logic
 open Ntcc
+open Utilities
 
 (* Auxiliary functions *)
-let constraint_ c = Constraint (Atom_C c)
 let test_equal_model (f: formula_t) (p:ntcc_process_t) = 
   let sm = symbolic_model p in
   Printf.printf "  * Testing NTCC process: %s\n" (string_of_process p);
@@ -25,10 +25,10 @@ let asynchronous_behavior = Parallel (Star (Tell (Atom_C "error")), Bang (Choice
 
 let test_symbolic_model = [
   "Tell" >:: test_equal_model (Constraint (Atom_C "c")) (Tell (Atom_C "c"));
-  "Next" >:: test_equal_model (X (constraint_ "c")) (Next (Tell (Atom_C "c")));
-  "Parallel" >:: test_equal_model (And (constraint_ "c", constraint_ "d")) (Parallel (Tell (Atom_C "c"), Tell (Atom_C "d")));
+  "Next" >:: test_equal_model (X (mk_atom "c")) (Next (Tell (Atom_C "c")));
+  "Parallel" >:: test_equal_model (And (mk_atom "c", mk_atom "d")) (Parallel (Tell (Atom_C "c"), Tell (Atom_C "d")));
   "Unless" >:: test_equal_model (Or (And (Not (Constraint (Atom_C "c")), X (Constraint (Atom_C "c"))), Constraint (Atom_C "c"))) (Unless (Atom_C "c", Tell (Atom_C "c")));
-  "When" >::  test_equal_model (Or (Not (constraint_ "c"), And (constraint_ "c", constraint_ "d"))) (Choice [(Atom_C "c", Tell (Atom_C "d"))])
+  "When" >::  test_equal_model (Or (Not (mk_atom "c"), And (mk_atom "c", mk_atom "d"))) (Choice [(Atom_C "c", Tell (Atom_C "d"))])
 ]
 
 (* suite of tests *)

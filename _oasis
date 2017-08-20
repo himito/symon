@@ -2,7 +2,7 @@ OASISFormat: 0.4
 Name:        symon
 Version:     1.0
 Synopsis:    Symbolic model checker for the non-deterministic timed
-  concurrent constraint calculus NTCC
+             concurrent constraint calculus NTCC
 Authors:     Jaime Arias
 LicenseFile: LICENSE
 License:     GPL-2
@@ -14,28 +14,28 @@ XOCamlbuildExtraArgs:
   -use-menhir -tag thread
 
 Executable symon
-  Path: src/application
-  MainIs: symbolicMC.ml
-  BuildTools: ocamlbuild
+  Path:         src/application
+  MainIs:       symbolicMC.ml
+  BuildTools:   ocamlbuild
   BuildDepends: symon_lib
 
 Library symon_lib 
-  Path: src/lib
-  Modules: Constraint, Ntcc, Logic, Lts, Symbolic, Utils
-  InternalModules: Lexer, Parser
-  BuildTools: ocamlbuild
-  BuildDepends: ocamlgraph, str
+  Path:             src/lib
+  Modules:          Constraint, Ntcc, Logic, Lts, Symbolic, Utils
+  InternalModules:  Lexer, Parser
+  BuildTools:       ocamlbuild
+  BuildDepends:     ocamlgraph, str
 
 Test main 
   Command: $test
 
 Executable test
-  Path:       test
-  MainIs:     tests.ml
-  BuildTools: ocamlbuild
-  BuildDepends: oUnit, symon_lib
+  Path:           test
+  MainIs:         tests.ml
+  BuildTools:     ocamlbuild
+  BuildDepends:   oUnit, symon_lib
   CompiledObject: best
-  Install: false
+  Install:        false
 
 Document api
   Title:                API reference for SyMoN

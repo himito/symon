@@ -18,7 +18,7 @@ let rec string_of_formula (f:formula_t) : string =
     Constraint c -> string_of_constraint c
   | Not f -> "¬" ^ (string_of_formula f)
   | And (f1, f2) -> Printf.sprintf "(%s /\\ %s)" (string_of_formula f1) (string_of_formula f2)
-  | Or (f1,f2) -> Printf.sprintf "[%s] \\/ [%s]" (string_of_formula f1) (string_of_formula f2)
+  | Or (f1,f2) -> Printf.sprintf "(%s \\/ %s)" (string_of_formula f1) (string_of_formula f2)
   | X f1 -> Printf.sprintf "X(%s)" (string_of_formula f1)
   | True -> "T"
   | False -> "F"
@@ -38,16 +38,33 @@ let negative = function (Not p) -> true | _ -> false
 (** Returns if a formula is positive *)
 let positive (f:formula_t) = not (negative f) 
 
+(** Nesting [X] operator *)
+let rec replicate_next (f:formula_t) (i:int) : formula_t =
+  if i > 0 then replicate_next (X f) (i-1) 
+  else f
+
+(* Breaks down a conjunction into a list of conjuncts *)
+let rec conjuncts (f:formula_t) : formula_t list =
+  match f with 
+    And(p,q) -> conjuncts p @ conjuncts q 
+  | _ -> [f]
+
+(* Breaks down a disjunctive into a list of disjuncts *)
+let rec disjuncts (f:formula_t) : formula_t list =
+  match f with 
+    Or(p,q) -> disjuncts p @ conjuncts q 
+  | _ -> [f]
+
 (* Simplify trivialities *)
 let simplify_trivial (f:formula_t) : formula_t =
   match f with
     Not False -> True
   | Not True -> False
-  | Not (Not p) -> p                         (* ¬¬p <=> p *)
-  | And(p, False) | And(False, p) -> False
-  | And(p, True) | And(True, p) -> p
-  | Or(p, False) | Or(False, p) -> p
-  | Or(p, True) | Or(True, p) -> True
+  | Not (Not p) -> p                         (* double negation: ¬¬p <=> p *)
+  | And(p, False) | And(False, p) -> False   (* annihilator /\: p /\ 0 <=> 0 *)
+  | And(p, True) | And(True, p) -> p         (* identity /\: p /\ 1 <=> p *)
+  | Or(p, False) | Or(False, p) -> p         (* identity \/: p \/ 0 <=> p *)
+  | Or(p, True) | Or(True, p) -> True        (* annihilator \/: p \/ 1 <=> 1 *)
   | _ -> f
 
 (** Simplify a formula *)
@@ -59,11 +76,17 @@ let rec simplify_formula (f:formula_t) : formula_t =
   | Or(p, q) -> simplify_trivial (Or (simplify_formula p, simplify_formula q))
   | _ -> f
 
-(** Nesting [X] operator *)
-let rec replicate_next (f:formula_t) (i:int) : formula_t =
-  match i with
-    0 -> f
-  | _ -> replicate_next (X f) (i-1)
+(** Generates a formula by concatenating each element of the list with an AND *)
+let list_to_and (l:formula_t list) : formula_t =
+  match l with
+    [] -> True
+  | _ -> simplify_formula (List.fold_left mk_and True l)
+
+(** Generate a formula by concatenating each element of the list with an OR *)
+let list_to_or (l:formula_t list) : formula_t =
+  match l with
+    [] -> False
+  | _ -> simplify_formula (List.fold_left mk_or False l)
 
 (** Returns the Negation Normal Form (NNF) of a formula *)
 let rec nnf (f:formula_t) (n:int) : formula_t = 
@@ -103,26 +126,6 @@ let string_of_formulas_set (s:FormulaSet.t) : string =
 let string_of_set_formulas_set (s:SetFormulaSet.t) : string =
   let list_formulas_set = List.map string_of_formulas_set (SetFormulaSet.elements s) in
   Printf.sprintf "{ %s }" (String.concat "," list_formulas_set)
-
-(** Generates a formula by concatenating each element of the list with an AND *)
-let list_to_and (l:formula_t list) : formula_t =
-  match l with
-    [] -> True
-  | _ -> simplify_formula (List.fold_left mk_and True l)
-
-(* Breaks down a conjunction into a list of conjuncts *)
-let rec and_to_list (f:formula_t) : formula_t list =
-  match f with And(p,q) -> and_to_list p @ and_to_list q | _ -> [f]
-
-(** Generate a formula by concatenating each element of the list with an OR *)
-let list_to_or (l:formula_t list) : formula_t =
-  match l with
-    [] -> False
-  | _ -> simplify_formula (List.fold_left mk_or False l)
-
-(* Breaks down a disjunctive into a list of disjuncts *)
-let rec or_to_list (f:formula_t) : formula_t list =
-  match f with Or(p,q) -> or_to_list p @ and_to_list q | _ -> [f]
 
 (** Applies distribute law to a formula *)
 let rec distribute_law (s1: SetFormulaSet.t) (s2: SetFormulaSet.t) : SetFormulaSet.t =
