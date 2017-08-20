@@ -94,6 +94,11 @@ let test_list_to_or = [
   "Two Element" >:: test_equal_formula (Or (mk_atom "c", mk_atom "d")) (list_to_or [mk_atom "c"; mk_atom "d"]);
 ]
 
+(** tests for the function nnf *)
+let test_nnf = [
+  "De Morgan law" >:: test_equal_formula (mk_or (Not (mk_atom "c")) (Not (mk_atom "d"))) (nnf (Not (mk_and (mk_atom "c") (mk_atom "d"))));
+]
+
 (* suite of tests *)
 let suite = [
   "Function string_of_formula" >::: test_string_of_formula;
@@ -109,4 +114,5 @@ let suite = [
   "Function simplify_formula" >::: test_simplify_formula;
   "Function list_to_and" >::: test_list_to_and;
   "Function list_to_or" >::: test_list_to_or;
+  "Function nnf" >::: test_nnf;
 ]

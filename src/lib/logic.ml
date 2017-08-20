@@ -2,6 +2,7 @@
 
 open Constraint
 open Utils
+open Set
 
 (** Constraint Temporal Logic (CLTL) formula *)
 type formula_t = Constraint of constraint_t    (** a constraint [c] *)
@@ -43,19 +44,19 @@ let rec replicate_next (f:formula_t) (i:int) : formula_t =
   if i > 0 then replicate_next (X f) (i-1) 
   else f
 
-(* Breaks down a conjunction into a list of conjuncts *)
+(** Breaks down a conjunction into a list of conjuncts *)
 let rec conjuncts (f:formula_t) : formula_t list =
   match f with 
     And(p,q) -> conjuncts p @ conjuncts q 
   | _ -> [f]
 
-(* Breaks down a disjunctive into a list of disjuncts *)
+(** Breaks down a disjunctive into a list of disjuncts *)
 let rec disjuncts (f:formula_t) : formula_t list =
   match f with 
     Or(p,q) -> disjuncts p @ conjuncts q 
   | _ -> [f]
 
-(* Simplify trivialities *)
+(** Simplify trivialities *)
 let simplify_trivial (f:formula_t) : formula_t =
   match f with
     Not False -> True
@@ -88,20 +89,20 @@ let list_to_or (l:formula_t list) : formula_t =
     [] -> False
   | _ -> simplify_formula (List.fold_left mk_or False l)
 
-(** Returns the Negation Normal Form (NNF) of a formula *)
-let rec nnf (f:formula_t) (n:int) : formula_t = 
-  match f with 
-  | And (p, q) -> And (nnf p n, nnf q n)
-  | Or (p, q) -> Or (nnf p n, nnf q n)
-  | Not (Not p) -> nnf p n                                   (* De Morgan law *)
-  | Not (And (p, q)) -> Or (nnf (Not p) n, nnf (Not q) n)    (* De Morgan law *)
-  | Not (Or (p, q)) -> And (nnf (Not p) n, nnf (Not q) n)    (* De Morgan law *)
-  | Not (X p) -> nnf (Not p) (n+1)                           (* negation elimination*)
-  | X p -> nnf p (n+1)
-  | _ -> replicate_next f n
-
 (** Returns the simplified NNF of a formula *)
-let nnf (f:formula_t) : formula_t = nnf (simplify_formula f) 0 
+let nnf (fm:formula_t) : formula_t = 
+  let rec nnf_ (f:formula_t) (n:int) : formula_t = 
+    match f with 
+    | And (p, q) -> And (nnf_ p n, nnf_ q n)
+    | Or (p, q) -> Or (nnf_ p n, nnf_ q n)
+    | Not (Not p) -> nnf_ p n                                   (* De Morgan law *)
+    | Not (And (p, q)) -> Or (nnf_ (Not p) n, nnf_ (Not q) n)   (* De Morgan law *)
+    | Not (Or (p, q)) -> And (nnf_ (Not p) n, nnf_ (Not q) n)   (* De Morgan law *)
+    | Not (X p) -> nnf_ (Not p) (n+1)                           (* negation elimination *)
+    | X p -> nnf_ p (n+1)
+    | _ -> replicate_next f n
+  in
+  nnf_ (simplify_formula fm) 0 
 
 (** A formulas set *)
 module FormulaSet = Set.Make (

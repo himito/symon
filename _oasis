@@ -24,7 +24,7 @@ Library symon_lib
   Modules:          Constraint, Ntcc, Logic, Lts, Symbolic, Utils
   InternalModules:  Lexer, Parser
   BuildTools:       ocamlbuild
-  BuildDepends:     ocamlgraph, str
+  BuildDepends:     ocamlgraph, str 
 
 Test main 
   Command: $test
