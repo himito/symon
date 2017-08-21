@@ -27,6 +27,6 @@ clean:
 	rm -rf src/lib/symon_lib.*
 
 deps:
-	opam install menhir oasis ounit 
+	opam install menhir oasis ounit ocamlgraph
 
 .PHONY: all build clean configure deps doc test 
