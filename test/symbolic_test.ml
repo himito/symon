@@ -10,8 +10,7 @@ open Utilities
 (* Auxiliary functions *)
 let test_equal_model (f: formula_t) (p:ntcc_process_t) = 
   let sm = symbolic_model p in
-  Printf.printf "  * Testing NTCC process: %s\n" (string_of_process p);
-  fun _ -> assert_equal f sm 
+  test_equal_formula f sm 
 
 (* NTCC processes *)
 let remark_3_1 = Parallel (Tell (Atom_C "c"), Choice [(Atom_C "c", Tell (Atom_C "d"))])
@@ -27,8 +26,9 @@ let test_symbolic_model = [
   "Tell" >:: test_equal_model (Constraint (Atom_C "c")) (Tell (Atom_C "c"));
   "Next" >:: test_equal_model (X (mk_atom "c")) (Next (Tell (Atom_C "c")));
   "Parallel" >:: test_equal_model (And (mk_atom "c", mk_atom "d")) (Parallel (Tell (Atom_C "c"), Tell (Atom_C "d")));
-  "Unless" >:: test_equal_model (Or (And (Not (Constraint (Atom_C "c")), X (Constraint (Atom_C "c"))), Constraint (Atom_C "c"))) (Unless (Atom_C "c", Tell (Atom_C "c")));
-  "When" >::  test_equal_model (Or (Not (mk_atom "c"), And (mk_atom "c", mk_atom "d"))) (Choice [(Atom_C "c", Tell (Atom_C "d"))])
+  "Unless" >:: test_equal_model (Or (Constraint (Atom_C "c"), And (Not (Constraint (Atom_C "c")), X (Constraint (Atom_C "c"))))) (Unless (Atom_C "c", Tell (Atom_C "c")));
+  "When" >::  test_equal_model (Or (And (mk_atom "c", mk_atom "d"), Not (mk_atom "c"))) (Choice [(Atom_C "c", Tell (Atom_C "d"))]);
+  "Remark 3.1" >:: test_equal_model (mk_and (mk_atom "c") (mk_atom "d")) remark_3_1
 ]
 
 (* suite of tests *)

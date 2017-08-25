@@ -1,5 +1,8 @@
 (** This module contains auxiliary functions *)
 
+open Lexer
+open Ntcc
+
 (** Builds a list of integers from [i] to [n-1] *)
 let rec build_list (i:int) (n:int) : 'i list =
   if i < n then
@@ -8,8 +11,22 @@ let rec build_list (i:int) (n:int) : 'i list =
     []
 
 (** Cartesian product of two lists *)
-let cartesian_product l1 l2 = 
+let cartesian_product (l1: 'a list) (l2: 'b list) : ('a * 'b) list = 
     List.concat (List.map (fun e -> List.map (fun e2 -> (e,e2)) l2) l1)
+
+(** function that parses a NTCC process from a string *)
+let process_from_string (s:string) : ntcc_program =
+  try
+    Parser.main Lexer.lex (Lexing.from_string s)
+  with _ -> print_endline "Error during parsing string"; exit(1)
+
+(** function that parses a NTCC program from a file **)
+let process_from_file (filename:string) : ntcc_program =
+  try
+    Parser.main Lexer.lex (Lexing.from_channel (open_in filename))
+  with
+    Sys_error(msg) -> print_endline msg; exit(1)
+  | Invalid_argument(_) -> print_endline "Error: the command needs a file as input."; exit(1)
 
 (*
 (** pretty representation of the symbolic representation *)

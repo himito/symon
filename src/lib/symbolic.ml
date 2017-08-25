@@ -18,6 +18,9 @@ let rec symbolic_model (ntcc_p:ntcc_process_t) : formula_t =
                 Or (list_to_and neg_part_list, list_to_or and_part_list)
   | _ -> failwith "Not implemented"
 
+let symbolic_model (ntcc_p:ntcc_process_t) : formula_t =
+  dnf (symbolic_model ntcc_p)
+
 (* 
 (** function that returns a new hashtbl of a specific size *)
 let newLTS (size:int) =

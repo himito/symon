@@ -8,7 +8,6 @@
 %{
   open Ntcc 
   open Constraint
-  open Utils
 %}
 
 %start <Ntcc.ntcc_program> main
